@@ -556,6 +556,92 @@ class System65
 		 */
 		void SYSTEM65CORE Insn_CPY(void); //!< Compare Y register
 
+		// Increment/Decrement
+
+		/**
+		 * Adds one to the value held at a specified memory location setting the
+		 * zero and negative flags as appropriate.
+		 *
+		 * Flags affected:
+		 * * Z: Set if result is zero
+		 * * N: Set if MSB of the result is set.
+		 */
+		void SYSTEM65CORE Insn_INC(void); //!< Increment a memory location
+
+		/**
+		 * Adds one to <tt>X</tt>, setting the zero and negative flags as
+		 * appropriate.
+		 *
+		 * Flags affected:
+		 * * Z: Set if X is zero
+		 * * N: Set if MSB of X is set
+		 */
+		void SYSTEM65CORE Insn_INX(void); //!< Increment X register
+
+		/**
+		 * Adds one to <tt>Y</tt>, setting the zero and negative flags as
+		 * appropriate.
+		 *
+		 * Flags affected:
+		 * * Z: Set if Y is zero
+		 * * N: Set if MSB of Y is set
+		 */
+		void SYSTEM65CORE Insn_INY(void); //!< Increment Y register
+
+		/**
+		 * Subtracts one from the value held at a specified memory location,
+		 * setting the zero and negative flags as appropriate.
+		 *
+		 * Flags affected:
+		 * * Z: Set if result is zero
+		 * * N: Set if MSB of the result is set
+		 */
+		void SYSTEM65CORE Insn_DEC(void); //!< Decrement a memory location
+
+		/**
+		 * Subtracts one from <tt>X</tt>, setting the zero and negative flags as
+		 * appropriate.
+		 *
+		 * Flags affected:
+		 * * Z: Set if X is zero
+		 * * N: Set if MSB of X is set
+		 */
+		void SYSTEM65CORE Insn_DEX(void); //!< Decrement X register
+
+		/**
+		 * Subtracts one from <tt>Y</tt>, setting the zero and negative flags as
+		 * appropriate.
+		 *
+		 * Flags affected:
+		 * * Z: Set if Y is zero
+		 * * N: Set if MSB of Y is set.
+		 */
+		void SYSTEM65CORE Insn_DEY(void); //!< Decrement Y register
+
+		// Shifts
+
+		/**
+		 * This operation shifts all the bits of the accumulator or memory
+		 * contents one bit left. Bit 0 is set to 0 and bit 7 is placed in the
+		 * carry flag. The effect of this operation is to multiply the memory
+		 * contents by 2 (ignoring 2's complement considerations), setting the
+		 * carry if the result will not fit in 8 bits.
+		 *
+		 * \todo Find out if Z is set on the memory location as well
+		 *
+		 * Flags affected:
+		 * * C: Set if MSB is set before shifting
+		 * * Z: Set if A == 0
+		 * * N: Set if MSB of result is set
+		 */
+		void SYSTEM65CORE Insn_ASL(void);
+
+		void SYSTEM65CORE Insn_LSR(void);
+
+		void SYSTEM65CORE Insn_ROL(void);
+
+		void SYSTEM65CORE Insn_ROR(void);
+
 		/** @} */
 };
 

@@ -86,6 +86,9 @@ uint16_t System65::GetRegister_PC(void)
 void SYSTEM65CORE System65::Dispatch(void)
 {
 	m_mutMachine.lock();
+#if _DEBUG
+	unsigned int oldcyclecount = m_CycleCount;
+#endif // _DEBUG
 
 	// Yes, a giant switch table. I know that it's a naive way to implement
 	// this; however, it also serves as a good reference implementation, since
@@ -279,12 +282,54 @@ void SYSTEM65CORE System65::Dispatch(void)
 		Insn_CPY();
 		break;
 
+	// ===================
+	// INCREMENT/DECREMENT
+	// ===================
+
+	case 0xe6: // INC
+	case 0xf6: //
+	case 0xee:
+	case 0xfe:
+		Insn_INC();
+		break;
+
+	case 0xe8: // INX
+		Insn_INX();
+		break;
+
+	case 0xc8: // INY
+		Insn_INY();
+		break;
+
+	case 0xc6: // DEC
+	case 0xd6: //
+	case 0xce:
+	case 0xde:
+		Insn_DEC();
+		break;
+
+	case 0xca: // DEX
+		Insn_DEX();
+		break;
+
+	// ======
+	// SHIFTS
+	// ======
+
+	case 0x0a: // ASL
+	case 0x06: //
+	case 0x16:
+	case 0x0e:
+	case 0x1e:
+		Insn_ASL();
+		break;
+
 	default:
 		printf("Unhandled opcode 0x%.2X @ $%.4X\n",memory[pc],pc);
 	}
 
 #if _DEBUG
-	assert(m_CycleCount != 0);
+	assert(oldcyclecount != m_CycleCount);
 #endif // _DEBUG
 
 	m_mutMachine.unlock();
@@ -878,6 +923,131 @@ void SYSTEM65CORE System65::Insn_CPY(void)
 }
 #undef LOCAL_LOADVAL
 
+// Increment/Decrement
+
+#define LOCAL_LOADADDR(isize,ccount,adm) \
+	m_CycleCount += ccount; \
+	addr = adm; \
+	pc += isize
+void SYSTEM65CORE System65::Insn_INC(void)
+{
+	uint16_t addr;
+	switch(memory[pc]) {
+	case 0xe6: // zeropage
+		LOCAL_LOADADDR(2,5,Addr_ZPG()); break;
+	case 0xf6: // zeropage,x
+		LOCAL_LOADADDR(2,6,Addr_ZPX()); break;
+	case 0xee: // absolute
+		LOCAL_LOADADDR(3,6,Addr_ABS()); break;
+	case 0xfe: // absolute,x
+		LOCAL_LOADADDR(3,7,Addr_ABX()); break;
+	default:
+		INSN_DECODE_ERROR(); return;
+	}
+
+	memory[addr]++;
+
+	Insn_Set_ZN_Flags(memory[addr]);
+}
+
+#define LOCAL_INCR(isize,ccount,reg) \
+	m_CycleCount += ccount; \
+	reg++; \
+	pc += isize
+void SYSTEM65CORE System65::Insn_INX(void)
+{
+#if _DEBUG
+	ASSERT_INSN(0xe8);
+#endif // _DEBUG
+	LOCAL_INCR(1,2,x);
+
+	Insn_Set_ZN_Flags(x);
+}
+
+void SYSTEM65CORE System65::Insn_INY(void)
+{
+#if _DEBUG
+	ASSERT_INSN(0xc8);
+#endif // _DEBUG
+	LOCAL_INCR(1,2,y);
+
+	Insn_Set_ZN_Flags(y);
+}
+#undef LOCAL_INCR
+
+void SYSTEM65CORE System65::Insn_DEC(void)
+{
+	uint16_t addr;
+	switch(memory[pc]) {
+	case 0xc6: // zeropage
+		LOCAL_LOADADDR(2,5,Addr_ZPG()); break;
+	case 0xd6: // zeropage,x
+		LOCAL_LOADADDR(2,6,Addr_ZPX()); break;
+	case 0xce: // absolute
+		LOCAL_LOADADDR(3,6,Addr_ABS()); break;
+	case 0xde: // absolute,x
+		LOCAL_LOADADDR(3,7,Addr_ABX()); break;
+	default:
+		INSN_DECODE_ERROR(); return;
+	}
+
+	memory[addr]--;
+
+	Insn_Set_ZN_Flags(memory[addr]);
+}
+#undef LOCAL_LOADADDR
+
+#define LOCAL_DECR(isize,ccount,reg) \
+	m_CycleCount += ccount; \
+	reg--; \
+	pc += isize
+void SYSTEM65CORE System65::Insn_DEX(void)
+{
+#if _DEBUG
+	ASSERT_INSN(0xca);
+#endif // _DEBUG
+	LOCAL_DECR(1,2,x);
+
+	Insn_Set_ZN_Flags(x);
+}
+
+void SYSTEM65CORE System65::Insn_DEY(void)
+{
+#if _DEBUG
+	ASSERT_INSN(0x88);
+#endif // _DEBUG
+	LOCAL_DECR(1,2,y);
+
+	Insn_Set_ZN_Flags(y);
+}
+#undef LOCAL_DECR
+
+// Shifts
+
+void SYSTEM65CORE System65::Insn_ASL(void)
+{
+	case 0x0a: // ASL
+	case 0x06: //
+	case 0x16:
+	case 0x0e:
+	case 0x1e:
+}
+
+void SYSTEM65CORE System65::Insn_LSR(void)
+{
+
+}
+
+void SYSTEM65CORE System65::Insn_ROL(void)
+{
+
+}
+
+void SYSTEM65CORE System65::Insn_ROR(void)
+{
+
+}
+
 // =================
 // EXECUTION HELPERS
 // =================
@@ -886,6 +1056,7 @@ void SYSTEM65CORE System65::Insn_Set_ZN_Flags(uint8_t reg)
 {
 	if (reg == 0)
 		pf |= System65::PFLAG_Z;
-	else if (reg & 0b10000000)
+
+	if (reg & 0b10000000)
 		pf |= System65::PFLAG_N;
 }
