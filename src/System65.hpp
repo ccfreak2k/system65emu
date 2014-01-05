@@ -44,6 +44,8 @@
  *
  * \todo Increment the cycle count in each stage of execution (allows for
  * accurate cycle penalty for cross-page reads).
+ *
+ * \todo A pointer table might be faster than a switch for instruction decoding.
  */
 
 /** \def FASTEMU When defined, functions will be inlined for speed. May increase code size heavily. */
@@ -490,6 +492,69 @@ class System65
 		 * * N: Set to bit 7 of the memory value
 		 */
 		void SYSTEM65CORE Insn_BIT(void); //!< Bit test
+
+		// Arithmetic Operations
+
+		/**
+		 * This instruction adds the contents of a memory location to <tt>A</tt>
+		 * together with the carry bit. If overflow occurs the carry bit is set;
+		 * this enables multiple byte addition to be performed.
+		 *
+		 * Flags affected:
+		 * * C: Set if overflow in bit 7
+		 * * Z: Set if A == 0
+		 * * V: Set if sign bit is incorrect
+		 * * N: Set if MSB of A is set
+		 */
+		void SYSTEM65CORE Insn_ADC(void); //!< Add with carry
+
+		/**
+		 * This instruction subtracts the contents of a memory location to
+		 * <tt>A</tt> together with the not of the carry bit. If overflow occurs
+		 * the carry bit is clear, this enables multiple byte subtraction to be
+		 * performed.
+		 *
+		 * Flags affected:
+		 * * C: Clear if overflow in bit 7
+		 * * Z: Set if A == 0
+		 * * V: Set if sign bit is incorrect
+		 * * N: Set if MSB of A is set
+		 */
+		void SYSTEM65CORE Insn_SBC(void); //!< Subtract with carry
+
+		/**
+		 * This instruction compares the contents of the accumulator with
+		 * another memory held value and sets the zero and carry flags as
+		 * appropriate.
+		 *
+		 * Flags affected:
+		 * * C: Set if A >= M
+		 * * Z: Set if A == M
+		 * * N: Set if MSB of result is set
+		 */
+		void SYSTEM65CORE Insn_CMP(void); //!< Compare accumulator
+
+		/**
+		 * This instruction compares the contents of <tt>X</tt> with another
+		 * memory held value and sets the zero and carry flags as appropriate.
+		 *
+		 * Flags affected:
+		 * * C: Set if X >= M
+		 * * Z: Set if X == M
+		 * * N: Set if MSB of result is set
+		 */
+		void SYSTEM65CORE Insn_CPX(void); //!< Compare X register
+
+		/**
+		 * This instruction compares the contents of <tt>Y</tt> with another
+		 * memory held value and sets the zero and carry flags as appropriate.
+		 *
+		 * Flags affected:
+		 * * C: Set if Y >= M
+		 * * Z: Set if Y == M
+		 * * N: Set if MSB of result is set
+		 */
+		void SYSTEM65CORE Insn_CPY(void); //!< Compare Y register
 
 		/** @} */
 };
