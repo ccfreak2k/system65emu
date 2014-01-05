@@ -58,16 +58,16 @@
 /** Function macro to assert the correct decoding of an instruction */
 #define ASSERT_INSN(byte) assert(memory[pc] == byte)
 
-/** Function macro for writing a value from memory to a register */
+/** Function macro for writing a value from a register to memory */
 #define INSN_R_TO_M(isize,ccount,reg,addrmode) \
 	m_CycleCount += ccount; \
-	reg = memory[addrmode]; \
+	memory[addrmode] = reg; \
 	pc += isize
 
-/** Function macro for writing a value from a register to memory */
+/** Function macro for writing a value from memory to a register */
 #define INSN_M_TO_R(isize,ccount,reg,addrmode) \
 	m_CycleCount += ccount; \
-	memory[addrmode] = reg; \
+	reg = memory[addrmode]; \
 	pc += isize
 
 /** Function macro for copying a value from one register to another */
