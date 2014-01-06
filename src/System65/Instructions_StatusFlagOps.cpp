@@ -4,12 +4,12 @@
 
 #define LOCAL_SET(flag) \
 	m_CycleCount += 2; \
-	pf |= flag; \
+	Helper_SetFlag(flag); \
 	pc += 1
 
 #define LOCAL_CLEAR(flag) \
 	m_CycleCount += 2; \
-	pf &= ~flag; \
+	Helper_ClearFlag(flag); \
 	pc += 1
 
 void SYSTEM65CORE System65::Insn_CLC(void)

@@ -216,6 +216,8 @@ class System65
 		 * \endcode
 		 *
 		 * For any instruction with \c A as the operand, e.g. <tt>OPC A</tt>, the operation will occur on <tt>A</tt>.
+		 *
+		 * \note This method is unused.
 		 */
 		uint8_t SYSTEM65CORE Addr_ACC(void); //!< Operand is the \c A register
 
@@ -280,6 +282,16 @@ class System65
 		 */
 		uint16_t SYSTEM65CORE Addr_INY(void); //!< Indirect indexed; operand is the Y-indexed value stored as a pointer in the zeropage address.
 
+		/**
+		 * Relative addressing mode is used by branch instructions (e.g.
+		 * \ref Insn_BEQ, \ref Insn_BNE, etc.) which contain a signed 8-bit relative
+		 * offset (from -128 to +127) which is added to <tt>PC</tt> if the
+		 * condition is true. As <tt>PC</tt> itself is incremented during
+		 * instruction execution by two the effective address range for the
+		 * target instruction must be with -126 to +129 bytes of the branch.
+		 *
+		 * \note This method is unused.
+		 */
 		uint16_t SYSTEM65CORE Addr_REL(void); //!< Relative; <tt>OPC $BB</tt> branch target is PC + offest <tt>$BB</tt>; bit 7 (V?) signifies negative offset
 
 		/**

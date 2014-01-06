@@ -24,7 +24,7 @@ System65::System65(unsigned int memsize) :
 #if _DEBUG
 	assert(memory != NULL);
 #endif // _DEBUG
-	memset(memory,0,sizeof(uint8_t)*0xFFFF);
+	memset(memory,0,sizeof(uint8_t)*0xffff);
 	memorysize = memsize;
 }
 
