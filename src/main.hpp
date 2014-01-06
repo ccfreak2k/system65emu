@@ -19,7 +19,7 @@
 // Project libs
 //#include "SDLContext.hpp"
 #include "SFMLContext.hpp"
-#include "System65.hpp"
+#include "System65/System65.hpp"
 
 // The render window is currently planned to be rendered in "text mode," with
 // all parts of the screen rendered as though it were a big console window. This
