@@ -349,6 +349,23 @@ void SYSTEM65CORE System65::Dispatch(void)
 		Insn_ROR();
 		break;
 
+	// ===========
+	// JUMPS/CALLS
+	// ===========
+
+	case 0x4c: // JMP
+	case 0x6c: //
+		Insn_JMP();
+		break;
+
+	case 0x20: // JSR
+		Insn_JSR();
+		break;
+
+	case 0x60: // RTS
+		Insn_RTS();
+		break;
+
 	default:
 		printf("Unhandled opcode 0x%.2X @ $%.4X\n",memory[pc],pc);
 	}

@@ -248,6 +248,18 @@ class System65
 		 */
 		uint16_t SYSTEM65CORE Addr_IMM(void); //!< Operand is a one-byte value used directly
 
+		/**
+		 * \ref Insn_JMP is the only 6502 instruction to support indirection.
+		 * The instruction contains a 16-bit address which identifies the
+		 * location of the least significant byte of another 16-bit memory
+		 * address which is the real target of the instruction.
+		 *
+		 * For example if location <tt>$0120</tt> contains <tt>$FC</tt> and
+		 * location <tt>$0121</tt> contains <tt>$BA</tt> then the instruction
+		 * <tt>JMP ($0120)</tt> will cause the next instruction execution to
+		 * occur at <tt>$BAFC</tt> (e.g. the contents of <tt>$0120</tt> and
+		 * <tt>$0121</tt>).
+		 */
 		uint16_t SYSTEM65CORE Addr_IND(void); //!< Indirect; <tt>OPC ($HHLL)</tt> operand is effective address; effective address is value of address
 
 		/**
@@ -328,13 +340,20 @@ class System65
 		 * @{
 		 */
 
-		/** Sets the Zero/Negative flags
-		 *
+		/**
 		 * If an instruction sets a register value, the register is usually
 		 * tested to see whether it is negative or zero; in either case, the
 		 * appropriate flag is set with this function.
 		 */
-		void SYSTEM65CORE Insn_Set_ZN_Flags(uint8_t reg);
+		void SYSTEM65CORE Helper_Set_ZN_Flags(uint8_t reg); //!< Sets the Zero/Negative flags
+
+		void SYSTEM65CORE Helper_PushByte(uint8_t val); //!< Push a single byte onto the stack
+
+		void SYSTEM65CORE Helper_PushWord(uint16_t val); //!< Push a word (two bytes) onto the stack
+
+		uint8_t SYSTEM65CORE Helper_PopByte(void); //!< Pop a single byte off of the stack
+
+		uint16_t SYSTEM65CORE Helper_PopWord(void); //!< Pop a word (two bytes) off of the stack
 
 		/** @} */
 
@@ -678,6 +697,42 @@ class System65
 		 * * N: Set if MSB of the result is set
 		 */
 		void SYSTEM65CORE Insn_ROR(void); //!< Rotate right
+
+		/**
+		 * Sets PC to the address specified by the operand.
+		 *
+		 * \note On the original 6502, the indirect vector is not fetched
+		 * correctly if it straddles a page boundary. Since this bug was fixed
+		 * on many CMOS variants, this behavior is not implemented.
+		 *
+		 * Flags affected:
+		 * * none
+		 */
+		void SYSTEM65CORE Insn_JMP(void); //!< Jump to another location
+
+		/**
+		 * The <tt>JSR</tt> instruction pushes the address (minus one) of the
+		 * return point on to the stack and then sets the program counter to the
+		 * target memory address.
+		 *
+		 * \todo Does he mean "plus one?"
+		 *
+		 * Flags affected:
+		 * * none
+		 */
+		void SYSTEM65CORE Insn_JSR(void); //!< Jump to a subroutine
+
+		/**
+		 * The <tt>RTS</tt> instruction is used at the end of a subroutine to
+		 * return to the calling routine. It pulls the program counter (minus
+		 * one) from the stack.
+		 *
+		 * \todo Does he mean "plus one?"
+		 *
+		 * Flags affected:
+		 * * none
+		 */
+		void SYSTEM65CORE Insn_RTS(void); //!< Return from a subroutine
 
 		/** @} */
 };

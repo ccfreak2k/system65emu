@@ -33,7 +33,12 @@ uint16_t SYSTEM65CORE System65::Addr_IMM(void)
 }
 
 // (Indirect)
-uint16_t SYSTEM65CORE System65::Addr_IND(void){ assert(false); }
+uint16_t SYSTEM65CORE System65::Addr_IND(void)
+{
+	// FIXME: Make sure this is correct
+	// In memory, address is stored as: LSB MSB
+	return (uint16_t)((uint16_t)memory[pc+2]+((uint16_t)memory[pc+1] << 4));
+}
 
 // (Indirect,X)
 uint16_t SYSTEM65CORE System65::Addr_INX(void)

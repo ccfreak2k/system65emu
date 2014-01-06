@@ -4,7 +4,7 @@
 #define LOCAL_AND(isize,ccount,addrmode) \
 	m_CycleCount += ccount; \
 	a &= memory[addrmode]; \
-	Insn_Set_ZN_Flags(a); \
+	Helper_Set_ZN_Flags(a); \
 	pc += isize
 void SYSTEM65CORE System65::Insn_AND(void)
 {
@@ -34,7 +34,7 @@ void SYSTEM65CORE System65::Insn_AND(void)
 #define LOCAL_EOR(isize,ccount,addrmode) \
 	m_CycleCount += ccount; \
 	a ^= memory[addrmode]; \
-	Insn_Set_ZN_Flags(a); \
+	Helper_Set_ZN_Flags(a); \
 	pc += isize
 void SYSTEM65CORE System65::Insn_EOR(void)
 {
@@ -64,7 +64,7 @@ void SYSTEM65CORE System65::Insn_EOR(void)
 #define LOCAL_ORA(isize,ccount,addrmode) \
 	m_CycleCount += ccount; \
 	a |= memory[addrmode]; \
-	Insn_Set_ZN_Flags(a); \
+	Helper_Set_ZN_Flags(a); \
 	pc += isize
 void SYSTEM65CORE System65::Insn_ORA(void)
 {

@@ -24,7 +24,7 @@ void SYSTEM65CORE System65::Insn_INC(void)
 
 	memory[addr]++;
 
-	Insn_Set_ZN_Flags(memory[addr]);
+	Helper_Set_ZN_Flags(memory[addr]);
 }
 
 #define LOCAL_INCR(isize,ccount,reg) \
@@ -38,7 +38,7 @@ void SYSTEM65CORE System65::Insn_INX(void)
 #endif // _DEBUG
 	LOCAL_INCR(1,2,x);
 
-	Insn_Set_ZN_Flags(x);
+	Helper_Set_ZN_Flags(x);
 }
 
 void SYSTEM65CORE System65::Insn_INY(void)
@@ -48,7 +48,7 @@ void SYSTEM65CORE System65::Insn_INY(void)
 #endif // _DEBUG
 	LOCAL_INCR(1,2,y);
 
-	Insn_Set_ZN_Flags(y);
+	Helper_Set_ZN_Flags(y);
 }
 #undef LOCAL_INCR
 
@@ -70,7 +70,7 @@ void SYSTEM65CORE System65::Insn_DEC(void)
 
 	memory[addr]--;
 
-	Insn_Set_ZN_Flags(memory[addr]);
+	Helper_Set_ZN_Flags(memory[addr]);
 }
 #undef LOCAL_LOADADDR
 
@@ -85,7 +85,7 @@ void SYSTEM65CORE System65::Insn_DEX(void)
 #endif // _DEBUG
 	LOCAL_DECR(1,2,x);
 
-	Insn_Set_ZN_Flags(x);
+	Helper_Set_ZN_Flags(x);
 }
 
 void SYSTEM65CORE System65::Insn_DEY(void)
@@ -95,6 +95,6 @@ void SYSTEM65CORE System65::Insn_DEY(void)
 #endif // _DEBUG
 	LOCAL_DECR(1,2,y);
 
-	Insn_Set_ZN_Flags(y);
+	Helper_Set_ZN_Flags(y);
 }
 #undef LOCAL_DECR

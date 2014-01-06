@@ -25,7 +25,7 @@ void SYSTEM65CORE System65::Insn_LDA(void)
 		INSN_DECODE_ERROR(); return;
 	}
 
-	Insn_Set_ZN_Flags(a);
+	Helper_Set_ZN_Flags(a);
 }
 
 void SYSTEM65CORE System65::Insn_LDX(void)
@@ -45,7 +45,7 @@ void SYSTEM65CORE System65::Insn_LDX(void)
 		INSN_DECODE_ERROR(); return;
 	}
 
-	Insn_Set_ZN_Flags(x);
+	Helper_Set_ZN_Flags(x);
 }
 
 void SYSTEM65CORE System65::Insn_LDY(void)
@@ -65,7 +65,7 @@ void SYSTEM65CORE System65::Insn_LDY(void)
 		INSN_DECODE_ERROR(); return;
 	}
 
-	Insn_Set_ZN_Flags(y);
+	Helper_Set_ZN_Flags(y);
 }
 
 void SYSTEM65CORE System65::Insn_STA(void)
