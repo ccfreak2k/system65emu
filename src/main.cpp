@@ -1,13 +1,34 @@
 #include <main.hpp>
 
-#if WIN32
-INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT)
-#else
+//#if WIN32
+//INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT)
+//#else
 int main (int argc, char **argv)
-#endif // WIN32
+//#endif // WIN32
 {
+	FILE *program = NULL;
+	char *progfilename;
+	// Process args
+	while (getopt(argc,argv,"b:") > 0) {
+		program = fopen(optarg,"rb");
+		if (program == NULL) {
+			printf("Could not open %s\n",optarg);
+			exit(1);
+		} else {
+			progfilename = new char[strlen(optarg)];
+			strcpy(progfilename,optarg);
+		}
+	}
+
 	// Make a System65 instance
 	System65 sys;
+
+	// Load the file
+	if (program != NULL) {
+		printf("Loading %s\n",progfilename);
+		sys.LoadProgram(program);
+		fclose(program);
+	}
 
 	// Make a render window
 	sf::RenderWindow window(sf::VideoMode(896,464), "System65 Emulator", sf::Style::Close);

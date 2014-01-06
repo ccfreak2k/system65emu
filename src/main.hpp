@@ -13,6 +13,8 @@
     #include <stdlib.h>
 #endif // __cplusplus
 
+#include <unistd.h>
+
 // Class-related libs
 #include <SFML/Graphics.hpp>
 
@@ -84,9 +86,9 @@
  * currently changes. Consult the main.hpp file for the exact signatures.
  */
 
-#ifndef WIN32
+//#ifndef WIN32
 int main (int argc, char **argv);
-#endif // WIN32
+//#endif // WIN32
 
 /** Draws the emulator screen frame.
  *
