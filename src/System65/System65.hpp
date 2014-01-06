@@ -152,6 +152,30 @@ class System65
 		/** Resets the cycle counter. */
 		void ResetCycleCount(void) { m_CycleCount = 0; }
 
+		/** Loads a program into memory from another memory pointer
+		 *
+		 * This will load up to 64KB - 512 bytes (65023 bytes / 63.5KB) of
+		 * program data pointed to by progmem into emulator memory. The function
+		 * will return when either the maximum amount of data has been loaded or
+		 * the limit specified by progsize has been reached.
+		 *
+		 * \param[in] progmem Program data to load into emulator memory
+		 * \param[in] progsize Size of the program data, in bytes
+		 */
+		void LoadProgram(void *progmem, unsigned int progsize);
+
+		/** Loads a program into memory from a file
+		 *
+		 * This will load up to 64KB - 512 bytes (65023 bytes / 63.5KB) of
+		 * program data from the file pointed to by progfile into emulator
+		 * memory. The function will return when either the maximum amount of
+		 * data has been loaded or the end of the file has been reached.
+		 *
+		 * \param[in] progfile File handle to a file to load into emulator
+		 * memory
+		 */
+		void LoadProgram(FILE *progfile);
+
 		uint8_t *memory; //!< Pointer to system memory for this system
 		unsigned int memorysize; //!< Size of memory for this system.
 

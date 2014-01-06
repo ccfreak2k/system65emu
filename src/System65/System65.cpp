@@ -11,7 +11,7 @@ System65::System65(unsigned int memsize) :
 	y(0x00),
 	pf(System65::PFLAG_R),
 	s(0x00),
-	pc(0x0000)
+	pc(0x0200)
 {
 	// Basic bounds checking
 	if (memsize > 0x10000)
@@ -31,6 +31,24 @@ System65::System65(unsigned int memsize) :
 System65::~System65()
 {
 	delete [] memory;
+}
+
+void System65::LoadProgram(void *progmem, unsigned int progsize)
+{
+	if (progmem == NULL)
+		return;
+	if (progsize == 0)
+		return;
+
+	memcpy(&memory[0x200],(uint8_t*)progmem,(size_t)((65536-512) < progsize ? (65536-512) : progsize));
+}
+
+void System65::LoadProgram(FILE *progfile)
+{
+	if (progfile == NULL)
+		return;
+
+	fread(&memory[0x200],sizeof(uint8_t),(65536-512),progfile);
 }
 
 void System65::Tick(void)
