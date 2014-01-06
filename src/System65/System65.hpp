@@ -80,19 +80,51 @@
 #define INSN_DECODE_ERROR() \
 	printf("ERROR: %s called with opcode 0x%.2X\n", __FUNCTION__, memory[pc])
 
-/** Function macro for returning an 8-bit value */
+/** Function macro for writing a value atomically */
+#define ATOMIC_SET(var,val) \
+	m_mutMachine.lock(); \
+	var = val; \
+	m_mutMachine.unlock()
+
+/** Function macro for returning an 8-bit value atomically */
 #define ATOMIC_RETURN_8(val) \
 	m_mutMachine.lock(); \
 	uint8_t retval = val; \
 	m_mutMachine.unlock(); \
 	return retval
 
-/** Function macro for returning a 16-bit value */
+/** Function macro for returning a 16-bit value atomically */
 #define ATOMIC_RETURN_16(val) \
 	m_mutMachine.lock(); \
 	uint16_t retval = val; \
 	m_mutMachine.unlock(); \
 	return retval
+
+/** Function macro for returning an 8-bit value from memory atomically */
+#define ATOMIC_READ_8(addr) \
+	m_mutMachine.lock(); \
+	uint8_t val = Helper_PeekByte(addr); \
+	m_mutMachine.unlock(); \
+	return val
+
+/** Function macro for returning a 16-bit value from memory atomically */
+#define ATOMIC_READ_16(addr) \
+	m_mutMachine.lock(); \
+	uint16_t val = Helper_PeekWord(addr); \
+	m_mutMachine.unlock(); \
+	return val
+
+/** Function macro for writing an 8-bit value to memory atomically */
+#define ATOMIC_WRITE_8(addr,val) \
+	m_mutMachine.lock(); \
+	Helper_PokeByte(addr,val); \
+	m_mutMachine.unlock()
+
+/** Function macro for writing a 16-bit value to memory atomically */
+#define ATOMIC_WRITE_16(addr,val) \
+	m_mutMachine.lock(); \
+	Helper_PokeWord(addr,val); \
+	m_mutMachine.unlock()
 
 class System65
 {
@@ -149,6 +181,21 @@ class System65
 		/** Returns the contents of the program counter register. */
 		uint16_t GetRegister_PC(void);
 
+		/** Sets the stack base page
+		 *
+		 * By default the stack page is 0x02 (effective start address is
+		 * 0x02FF).
+		 *
+		 * \param[in] base New base page for the stack
+		 */
+		void SetStackBasePage(uint8_t base);
+
+		/** Sets the interrupt vector address
+		 *
+		 * \param[in] ivec New address to vector to on interrupt
+		 */
+		void SetInterruptVector(uint16_t ivec);
+
 		/** Resets the cycle counter. */
 		void ResetCycleCount(void) { m_CycleCount = 0; }
 
@@ -184,6 +231,8 @@ class System65
 	protected:
 	private:
 		unsigned int m_CycleCount; //!< Tracks the number of cycles executed so far.
+
+		uint16_t m_StackBase; //!< Base address that the stack resides at
 
 		/** \defgroup 65regs 6502 Registers
 		 *

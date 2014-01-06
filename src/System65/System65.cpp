@@ -6,6 +6,7 @@
 
 System65::System65(unsigned int memsize) :
 	m_CycleCount(0),
+	m_StackBase(0x0200),
 	a(0x00),
 	x(0x00),
 	y(0x00),
@@ -95,6 +96,16 @@ uint8_t System65::GetRegister_S(void)
 uint16_t System65::GetRegister_PC(void)
 {
 	ATOMIC_RETURN_16(pc);
+}
+
+void System65::SetStackBasePage(uint8_t base)
+{
+	ATOMIC_SET(m_StackBase,((uint16_t)base << 8));
+}
+
+void System65::SetInterruptVector(uint16_t ivec)
+{
+	ATOMIC_WRITE_16(0xFFFE,ivec);
 }
 
 //------------------------------------------------------------------------------

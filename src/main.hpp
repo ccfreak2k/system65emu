@@ -143,4 +143,8 @@ void DrawString(sf::Sprite screenbuf[EMUSCREEN_WIDTH][EMUSCREEN_HEIGHT], const c
  */
 void DrawChar(sf::Sprite screenbuf[EMUSCREEN_WIDTH][EMUSCREEN_HEIGHT], char c, unsigned int x, unsigned int y);
 
+/** Show options accepted by the program.
+ */
+void ShowHelp(void);
+
 #endif // MAIN_HPP
