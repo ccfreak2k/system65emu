@@ -824,6 +824,50 @@ class System65
 		 */
 		void SYSTEM65CORE Insn_BVS(void); //!< Branch if overflow flag is set
 
+		// Status flag operations
+
+		/**
+		 * Flags affected:
+		 * * C: Cleared
+		 */
+		void SYSTEM65CORE Insn_CLC(void); //!< Clear carry flag
+
+		/**
+		 * Flags affected:
+		 * * D: Cleared
+		 */
+		void SYSTEM65CORE Insn_CLD(void); //!< Clear decimal mode flag
+
+		/**
+		 * Flags affected:
+		 * * I: Cleared
+		 */
+		void SYSTEM65CORE Insn_CLI(void); //!< Clear interrupt disable flag
+
+		/**
+		 * Flags affected:
+		 * * \ref V: Cleared
+		 */
+		void SYSTEM65CORE Insn_CLV(void); //!< Clear overflow flag
+
+		/**
+		 * Flags affected:
+		 * * C: Set
+		 */
+		void SYSTEM65CORE Insn_SEC(void); //!< Set carry flag
+
+		/**
+		 * Flags affected:
+		 * * D: Set
+		 */
+		void SYSTEM65CORE Insn_SED(void); //!< Set decimal mode flag
+
+		/**
+		 * Flags affected:
+		 * * I: Set
+		 */
+		void SYSTEM65CORE Insn_SEI(void); //!< Set interrupt disable flag
+
 		/** @} */
 };
 

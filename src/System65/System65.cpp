@@ -402,6 +402,38 @@ void SYSTEM65CORE System65::Dispatch(void)
 		Insn_BVS();
 		break;
 
+	// ======================
+	// STATUS FLAG OPERATIONS
+	// ======================
+
+	case 0x18: // CLC
+		Insn_CLC();
+		break;
+
+	case 0xd8: // CLD
+		Insn_CLD();
+		break;
+
+	case 0x58: // CLI
+		Insn_CLI();
+		break;
+
+	case 0xb8: // CLV
+		Insn_CLV();
+		break;
+
+	case 0x38: // SEC
+		Insn_SEC();
+		break;
+
+	case 0xf8: // SED
+		Insn_SED();
+		break;
+
+	case 0x78: // SEI
+		Insn_SEI();
+		break;
+
 	default:
 		printf("Unhandled opcode 0x%.2X @ $%.4X\n",memory[pc],pc);
 	}
