@@ -628,19 +628,43 @@ class System65
 		 * carry if the result will not fit in 8 bits.
 		 *
 		 * \todo Find out if Z is set on the memory location as well
+		 * \todo Check if MSB/sign bit needs to be preserved
 		 *
 		 * Flags affected:
 		 * * C: Set if MSB is set before shifting
-		 * * Z: Set if A == 0
+		 * * Z: Set if result is zero
 		 * * N: Set if MSB of result is set
 		 */
-		void SYSTEM65CORE Insn_ASL(void);
+		void SYSTEM65CORE Insn_ASL(void); //!< Arithmetic shift left
 
-		void SYSTEM65CORE Insn_LSR(void);
+		/**
+		 * Each of the bits in <tt>A</tt> or the specified memory location are
+		 * shifted one place to the right. The bit that was in bit 0 is shifted
+		 * into the carry flag. Bit 7 is set to zero.
+		 *
+		 * Flags affected:
+		 * * C: Set to contents of LSB before shifting
+		 * * Z: Set if result is zero
+		 * * N: Set if MSB of result is set
+		 */
+		void SYSTEM65CORE Insn_LSR(void); //!< Logical shift right
 
-		void SYSTEM65CORE Insn_ROL(void);
+		/**
+		 * Move each of the bits in either <tt>A</tt> or the specified memory
+		 * location one place to the left. Bit 0 is filled with the current
+		 * value of the carry flag whilst the old bit 7 becomes the new carry
+		 * flag value.
+		 *
+		 * \todo Check affected flags for correctness
+		 *
+		 * Flags affected:
+		 * * C: Set to contents of MSB before shifting
+		 * * Z: Set if result is 0
+		 * * N: Set if MSB of result is set
+		 */
+		void SYSTEM65CORE Insn_ROL(void); //!< Rotate left
 
-		void SYSTEM65CORE Insn_ROR(void);
+		void SYSTEM65CORE Insn_ROR(void); //!< Rotate right
 
 		/** @} */
 };
