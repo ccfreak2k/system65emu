@@ -369,6 +369,42 @@ class System65
 		 */
 		void SYSTEM65CORE Helper_SetBranch(bool branch); //!< Set PC to the relative address
 
+		/**
+		 * \param[in] addr Address to read the value from
+		 *
+		 * \return Value at the specified address
+		 */
+		uint8_t SYSTEM65CORE Helper_PeekByte(uint16_t addr); //!< Read a byte from memory
+
+		/**
+		 * \param[in] addr Address to read the value from
+		 *
+		 * \return Value at the specified address
+		 */
+		uint16_t SYSTEM65CORE Helper_PeekWord(uint16_t addr); //!< Read a word (2 bytes) from memory
+
+		/**
+		 * \param[in] addr Address to write the value to
+		 * \param[in] val Value to write to the specified address
+		 */
+		void SYSTEM65CORE Helper_PokeByte(uint16_t addr, uint8_t val); //!< Write a byte into memory
+
+		/**
+		 * \param[in] addr Address to write the value to
+		 * \param[in] val Value to write to the specified address
+		 */
+		void SYSTEM65CORE Helper_PokeWord(uint16_t addr, uint16_t val); //!< Write a word (2 bytes) into memory
+
+		/**
+		 * \param[in] flag Flag to set
+		 */
+		void SYSTEM65CORE Helper_SetFlag(System65::PFLAGS flag); //!< Sets a processor state flag
+
+		/**
+		 * \param[in] flag Flag to clear
+		 */
+		void SYSTEM65CORE Helper_ClearFlag(System65::PFLAGS flag); //!< Clears a processor state flag
+
 		/** @} */
 
 		/** \defgroup system65instructions CPU instructions
@@ -867,6 +903,36 @@ class System65
 		 * * I: Set
 		 */
 		void SYSTEM65CORE Insn_SEI(void); //!< Set interrupt disable flag
+
+		// System operations
+
+		/**
+		 * The <tt>BRK</tt> instruction forces the generation of an interrupt
+		 * request. <tt>PC</tt> and processor status are pushed on the stack,
+		 * then the IRQ interrupt vector at <tt>$FFFE/<tt>$FFFF</tt> is loaded
+		 * into <tt>PC</tt> and the B flag in the status register is set to 1.
+		 *
+		 * Flags affected:
+		 * * B: Set to 1
+		 */
+		void SYSTEM65CORE Insn_BRK(void); //!< Force an interrupt
+
+		/**
+		 * The <tt>NOP</tt> instruction causes no changes to the processor state
+		 * other than the normal incrementing of <tt>PC</tt> to the next
+		 * instruction.
+		 *
+		 * Flags affected:
+		 * * none
+		 */
+		void SYSTEM65CORE Insn_NOP(void); //!< No operation
+
+		/**
+		 * The <tt>RTI</tt> instruction is used at the end of an interrupt
+		 * processing routine. It pulls the processor flags from the stack
+		 * followed by <tt>PC</tt>.
+		 */
+		void SYSTEM65CORE Insn_RTI(void); //!< Return from interrupt
 
 		/** @} */
 };

@@ -29,7 +29,8 @@ uint8_t SYSTEM65CORE System65::Helper_PopByte(void)
 
 uint16_t SYSTEM65CORE System65::Helper_PopWord(void)
 {
-	return (Helper_PopByte() + (Helper_PopByte() << 8));
+	uint16_t val = Helper_PopByte();
+	return val + (Helper_PopByte() << 8);
 }
 
 void SYSTEM65CORE System65::Helper_SetBranch(bool branch)
@@ -41,4 +42,35 @@ void SYSTEM65CORE System65::Helper_SetBranch(bool branch)
 	} else {
 		pc += 2;
 	}
+}
+
+uint8_t SYSTEM65CORE System65::Helper_PeekByte(uint16_t addr)
+{
+	return memory[addr];
+}
+
+uint16_t SYSTEM65CORE System65::Helper_PeekWord(uint16_t addr)
+{
+	return memory[addr+1] + (memory[addr] << 8);
+}
+
+void SYSTEM65CORE System65::Helper_PokeByte(uint16_t addr, uint8_t val)
+{
+	memory[addr] = val;
+}
+
+void SYSTEM65CORE System65::Helper_PokeWord(uint16_t addr, uint16_t val)
+{
+	memory[addr] = val;
+	memory[addr+1] = (val >> 8);
+}
+
+void SYSTEM65CORE System65::Helper_SetFlag(System65::PFLAGS flag)
+{
+	pf |= flag;
+}
+
+void SYSTEM65CORE System65::Helper_ClearFlag(System65::PFLAGS flag)
+{
+	pf &= ~flag;
 }

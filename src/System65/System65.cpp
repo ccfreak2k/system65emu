@@ -434,6 +434,22 @@ void SYSTEM65CORE System65::Dispatch(void)
 		Insn_SEI();
 		break;
 
+	// =================
+	// SYSTEM OPERATIONS
+	// =================
+
+	case 0x00: // BRK
+		Insn_BRK();
+		break;
+
+	case 0xea: // NOP
+		Insn_NOP();
+		break;
+
+	case 0x40: // RTI
+		Insn_RTI();
+		break;
+
 	default:
 		printf("Unhandled opcode 0x%.2X @ $%.4X\n",memory[pc],pc);
 	}
