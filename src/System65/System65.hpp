@@ -664,6 +664,19 @@ class System65
 		 */
 		void SYSTEM65CORE Insn_ROL(void); //!< Rotate left
 
+		/**
+		 * Move each of the bits in either <tt>A</tt> or the specified memory
+		 * location one place to the right. Bit 7 is filled with the current
+		 * value of the carry flag whilst the old bit 0 becomes the new carry
+		 * flag value.
+		 *
+		 * \todo Check affected flags for correctness
+		 *
+		 * Flags affected:
+		 * * C: Set to contents of old bit 0
+		 * * Z: Set if result is 0
+		 * * N: Set if MSB of the result is set
+		 */
 		void SYSTEM65CORE Insn_ROR(void); //!< Rotate right
 
 		/** @} */

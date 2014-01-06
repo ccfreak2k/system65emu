@@ -341,6 +341,14 @@ void SYSTEM65CORE System65::Dispatch(void)
 		Insn_ROL();
 		break;
 
+	case 0x6a: // ROR
+	case 0x66: //
+	case 0x76:
+	case 0x6e:
+	case 0x7e:
+		Insn_ROR();
+		break;
+
 	default:
 		printf("Unhandled opcode 0x%.2X @ $%.4X\n",memory[pc],pc);
 	}

@@ -92,30 +92,39 @@ void SYSTEM65CORE System65::Insn_LSR(void)
 #undef LOCAL_LSR
 
 #define LOCAL_ROL(isize,ccount,addrmode) \
-	m_CycleCount += ccount; \
-	addr = addrmode; \
-	if (memory[addr] == 0) \
-		pf |= System65::PFLAG_Z; \
-	else { \
-	if (memory[addr] & 0b10000000) \
-		pf |= System65::PFLAG_C; \
-	memory[addr] = (memory[addr] << 1 | (pf & System65::PFLAG_C ? 1 : 0)); \
-	if (memory[addr] & 0b10000000) \
-		pf |= System65::PFLAG_N; \
-	} \
-	pc += isize
+		m_CycleCount += ccount; \
+		addr = addrmode; \
+		if (memory[addr] == 0) \
+			pf |= System65::PFLAG_Z; \
+		else { \
+			carry = ((a & 0b10000000) ? 1 : 0); \
+			memory[addr] = (memory[addr] << 1 | (pf & System65::PFLAG_C ? 1 : 0)); \
+			if (carry) \
+				pf |= System65::PFLAG_C; \
+			else \
+				pf &= ~System65::PFLAG_C; \
+			if (memory[addr] & 0b10000000) \
+				pf |= System65::PFLAG_N; \
+		} \
+		pc += isize
 void SYSTEM65CORE System65::Insn_ROL(void)
 {
 	uint16_t addr;
+	bool carry;
 	switch (memory[pc]) {
 	case 0x2a: // accumulator
 		m_CycleCount += 2;
 		if (a == 0)
 			pf |= System65::PFLAG_Z;
 		else {
-			if (a & 0b10000000)
-				pf |= System65::PFLAG_C;
+			carry = ((a & 0b10000000) ? 1 : 0);
 			a = (a << 1 | (pf & System65::PFLAG_C ? 1 : 0));
+
+			if (carry)
+				pf |= System65::PFLAG_C;
+			else
+				pf &= ~System65::PFLAG_C;
+
 			if (a & 0b10000000)
 				pf |= System65::PFLAG_N;
 		}
@@ -135,7 +144,54 @@ void SYSTEM65CORE System65::Insn_ROL(void)
 }
 #undef LOCAL_ROL
 
+#define LOCAL_ROR(isize,ccount,addrmode) \
+		m_CycleCount += ccount; \
+		addr = addrmode; \
+		if (memory[addr] == 0) \
+			pf |= System65::PFLAG_Z; \
+		else { \
+			carry = ((memory[addr] & 0b00000001) ? 1 : 0); \
+			memory[addr] = (memory[addr] >> 1 | (pf |= System65::PFLAG_C ? 1 : 0)); \
+			if (carry) \
+				pf |= System65::PFLAG_C; \
+			else \
+				pf &= ~System65::PFLAG_C; \
+			if (memory[addr] & 0b10000000) \
+				pf |= System65::PFLAG_N; \
+		} \
+		pc += isize
 void SYSTEM65CORE System65::Insn_ROR(void)
 {
+	uint16_t addr;
+	bool carry;
+	switch (memory[pc]) {
+	case 0x6a: // accumulator
+		m_CycleCount += 2;
+		if (a == 0)
+			pf |= System65::PFLAG_Z;
+		else {
+			carry = ((a & 0b00000001) ? 1 : 0);
+			a = (a >> 1 | (pf |= System65::PFLAG_C ? 1 : 0));
 
+			if (carry)
+				pf |= System65::PFLAG_C;
+			else
+				pf &= ~System65::PFLAG_C;
+
+			if (a & 0b10000000)
+				pf |= System65::PFLAG_N;
+		}
+		pc += 1;
+		break;
+	case 0x66: // zeropage
+		LOCAL_ROR(2,5,Addr_ZPG()); break;
+	case 0x76: // zeropage,x
+		LOCAL_ROR(2,6,Addr_ZPX()); break;
+	case 0x6e: // absolute
+		LOCAL_ROR(3,6,Addr_ABS()); break;
+	case 0x7e: // absoute,x
+		LOCAL_ROR(3,7,Addr_ABX()); break;
+	default:
+		INSN_DECODE_ERROR(); break;
+	}
 }
