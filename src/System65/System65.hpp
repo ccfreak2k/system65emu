@@ -351,9 +351,23 @@ class System65
 
 		void SYSTEM65CORE Helper_PushWord(uint16_t val); //!< Push a word (two bytes) onto the stack
 
+		/**
+		 * \return byte popped from the stack
+		 */
 		uint8_t SYSTEM65CORE Helper_PopByte(void); //!< Pop a single byte off of the stack
 
+		/**
+		 * \return word popped from the stack
+		 */
 		uint16_t SYSTEM65CORE Helper_PopWord(void); //!< Pop a word (two bytes) off of the stack
+
+		/**
+		 * A wrapper for most of the functionality for branch instructions.
+		 *
+		 * \param[in] branch Bool for whether or not to read the next byte for
+		 * relative jump
+		 */
+		void SYSTEM65CORE Helper_SetBranch(bool branch); //!< Set PC to the relative address
 
 		/** @} */
 
@@ -698,6 +712,8 @@ class System65
 		 */
 		void SYSTEM65CORE Insn_ROR(void); //!< Rotate right
 
+		// Jumps/Calls
+
 		/**
 		 * Sets PC to the address specified by the operand.
 		 *
@@ -733,6 +749,80 @@ class System65
 		 * * none
 		 */
 		void SYSTEM65CORE Insn_RTS(void); //!< Return from a subroutine
+
+		// Branches
+
+		/**
+		 * If the carry flag is clear, then add the relative displacement to PC
+		 * to cause a branch to a new location.
+		 *
+		 * Flags affected:
+		 * * none
+		 */
+		void SYSTEM65CORE Insn_BCC(void); //!< Branch if carry flag is clear
+
+		/**
+		 * If the carry flag is set, then add the relative displacement to PC to
+		 * cause a branch to a new location.
+		 *
+		 * Flags affected:
+		 * * none
+		 */
+		void SYSTEM65CORE Insn_BCS(void); //!< Branch if carry flag is set
+
+		/**
+		 * If the zero flag is set, then add the relative displacement to PC to
+		 * cause a branch to a new location.
+		 *
+		 * Flags affected:
+		 * * none
+		 */
+		void SYSTEM65CORE Insn_BEQ(void); //!< Branch if zero flag is set
+
+		/**
+		 * If the negative flag is set, then add the relative displacement to PC
+		 * to cause a branch to a new location.
+		 *
+		 * Flags affected:
+		 * * none
+		 */
+		void SYSTEM65CORE Insn_BMI(void); //!< Branch if negative flag is set
+
+		/**
+		 * If the zero flag is clear, then add the relative displacement to PC
+		 * to cause a branch to a new location.
+		 *
+		 * Flags affected:
+		 * * none
+		 */
+		void SYSTEM65CORE Insn_BNE(void); //!< Branch if zero flag is clear
+
+		/**
+		 * If the negative flag is clear, then add the relative displacement to
+		 * PC to cause a branch to a new location.
+		 *
+		 * Flags affected:
+		 * * none
+		 */
+		void SYSTEM65CORE Insn_BPL(void); //!< Branch if negative flag is clear
+
+		/**
+		 * If the overflow flag is set, then add the relative displacement to PC
+		 * to cause a branch to a new location.
+		 *
+		 * Flags affected:
+		 * * none
+		 */
+		void SYSTEM65CORE Insn_BVC(void); //!< Branch if overflow flag is clear
+
+		/**
+		 * If the overflow flag is set, then add the relative displacement to PC
+		 * to cause a branch to a new location.
+		 *
+		 * Flags affected:
+		 * * none
+		 */
+		void SYSTEM65CORE Insn_BVS(void); //!< Branch if overflow flag is set
 
 		/** @} */
 };

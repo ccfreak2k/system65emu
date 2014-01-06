@@ -31,3 +31,14 @@ uint16_t SYSTEM65CORE System65::Helper_PopWord(void)
 {
 	return (Helper_PopByte() + (Helper_PopByte() << 8));
 }
+
+void SYSTEM65CORE System65::Helper_SetBranch(bool branch)
+{
+	m_CycleCount += 2;
+	if (branch) {
+		m_CycleCount++;
+		pc = (int8_t)memory[pc+1];
+	} else {
+		pc += 2;
+	}
+}

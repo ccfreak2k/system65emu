@@ -366,6 +366,42 @@ void SYSTEM65CORE System65::Dispatch(void)
 		Insn_RTS();
 		break;
 
+	// ========
+	// BRANCHES
+	// ========
+
+	case 0x90: // BCC
+		Insn_BCC();
+		break;
+
+	case 0xb0: // BCS
+		Insn_BCS();
+		break;
+
+	case 0xf0: // BEQ
+		Insn_BEQ();
+		break;
+
+	case 0x30: // BMI
+		Insn_BMI();
+		break;
+
+	case 0xd0: // BNE
+		Insn_BNE();
+		break;
+
+	case 0x10: // BPL
+		Insn_BPL();
+		break;
+
+	case 0x50: // BVC
+		Insn_BVC();
+		break;
+
+	case 0x70: // BVS
+		Insn_BVS();
+		break;
+
 	default:
 		printf("Unhandled opcode 0x%.2X @ $%.4X\n",memory[pc],pc);
 	}
