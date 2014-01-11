@@ -13,7 +13,7 @@ void SYSTEM65CORE System65::Helper_Set_ZN_Flags(uint8_t reg)
 
 void SYSTEM65CORE System65::Helper_PushByte(uint8_t val)
 {
-	memory[0x100+(--s)] = val;
+	memory[m_StackBase+(--s)] = val;
 }
 
 void SYSTEM65CORE System65::Helper_PushWord(uint16_t val)
@@ -24,7 +24,7 @@ void SYSTEM65CORE System65::Helper_PushWord(uint16_t val)
 
 uint8_t SYSTEM65CORE System65::Helper_PopByte(void)
 {
-	return memory[0x100+(s++)];
+	return memory[m_StackBase+(s++)];
 }
 
 uint16_t SYSTEM65CORE System65::Helper_PopWord(void)
@@ -38,7 +38,7 @@ void SYSTEM65CORE System65::Helper_SetBranch(bool branch)
 	m_CycleCount += 2;
 	if (branch) {
 		m_CycleCount++;
-		pc = (int8_t)memory[pc+1];
+		pc += (int8_t)memory[pc+1];
 	} else {
 		pc += 2;
 	}
@@ -73,4 +73,25 @@ void SYSTEM65CORE System65::Helper_SetFlag(System65::PFLAGS flag)
 void SYSTEM65CORE System65::Helper_ClearFlag(System65::PFLAGS flag)
 {
 	pf &= ~flag;
+}
+
+bool SYSTEM65CORE System65::Helper_GetFlag(System65::PFLAGS flag)
+{
+	return ((pf & flag) != 0);
+}
+
+void SYSTEM65CORE System65::Helper_SetClearC(bool val)
+{
+	if (val)
+		Helper_SetFlag(System65::PFLAG_C);
+	else
+		Helper_ClearFlag(System65::PFLAG_C);
+}
+
+void SYSTEM65CORE System65::Helper_SetClearZ(bool val)
+{
+	if (val)
+		Helper_SetFlag(System65::PFLAG_Z);
+	else
+		Helper_ClearFlag(System65::PFLAG_Z);
 }
