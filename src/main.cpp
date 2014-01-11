@@ -80,6 +80,9 @@ int main (int argc, char **argv)
 	while(window.isOpen()) {
 		sf::Event event;
 
+		// Step vm execution
+		sys.Tick();
+
 		while (window.pollEvent(event)) {
 			if (event.type == sf::Event::Closed) {
 				printf("[DEBUG] Window closed\n");
@@ -89,6 +92,7 @@ int main (int argc, char **argv)
 
 		// Draw the window buffer
 		window.clear(sf::Color::Black);
+		DrawStats(screenbuf,&sys); // Update the onscreen CPU state
 		for (int x = 0; x < EMUSCREEN_WIDTH; x++) {
 			for (int y = 0; y < EMUSCREEN_HEIGHT; y++)
 					window.draw(screenbuf[x][y]);
