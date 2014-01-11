@@ -4,6 +4,9 @@
 
 void SYSTEM65CORE System65::Insn_LDA(void)
 {
+#ifdef DEBUG_PRINT_INSTRUCTION
+	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+#endif // DEBUG_PRINT_INSTRUCTION
 	switch (memory[pc]) {
 	case 0xa9: // immediate
 		INSN_M_TO_R(2,2,a,Addr_IMM()); break;
@@ -30,6 +33,9 @@ void SYSTEM65CORE System65::Insn_LDA(void)
 
 void SYSTEM65CORE System65::Insn_LDX(void)
 {
+#ifdef DEBUG_PRINT_INSTRUCTION
+	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+#endif // DEBUG_PRINT_INSTRUCTION
 	switch (memory[pc]) {
 	case 0xa2: // immediate
 		INSN_M_TO_R(2,2,x,Addr_IMM()); break;
@@ -50,6 +56,9 @@ void SYSTEM65CORE System65::Insn_LDX(void)
 
 void SYSTEM65CORE System65::Insn_LDY(void)
 {
+#ifdef DEBUG_PRINT_INSTRUCTION
+	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+#endif // DEBUG_PRINT_INSTRUCTION
 	switch (memory[pc]) {
 	case 0xa0: // immediate
 		INSN_M_TO_R(2,2,y,Addr_IMM()); break;
@@ -70,6 +79,9 @@ void SYSTEM65CORE System65::Insn_LDY(void)
 
 void SYSTEM65CORE System65::Insn_STA(void)
 {
+#ifdef DEBUG_PRINT_INSTRUCTION
+	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+#endif // DEBUG_PRINT_INSTRUCTION
 	switch(memory[pc]) {
 	case 0x85: // zeropage
 		INSN_R_TO_M(2,3,a,Addr_ZPG()); break;
@@ -92,6 +104,9 @@ void SYSTEM65CORE System65::Insn_STA(void)
 
 void SYSTEM65CORE System65::Insn_STX(void)
 {
+#ifdef DEBUG_PRINT_INSTRUCTION
+	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+#endif // DEBUG_PRINT_INSTRUCTION
 	switch (memory[pc]) {
 	case 0x86: // zeropage
 		INSN_R_TO_M(2,3,x,Addr_ZPG()); break;
@@ -106,6 +121,9 @@ void SYSTEM65CORE System65::Insn_STX(void)
 
 void SYSTEM65CORE System65::Insn_STY(void)
 {
+#ifdef DEBUG_PRINT_INSTRUCTION
+	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+#endif // DEBUG_PRINT_INSTRUCTION
 	switch (memory[pc]) {
 	case 0x84: // zeropage
 		INSN_R_TO_M(2,3,y,Addr_ZPG()); break;

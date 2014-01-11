@@ -38,6 +38,9 @@ void SYSTEM65CORE System65::Insn_AND(void)
 	pc += isize
 void SYSTEM65CORE System65::Insn_EOR(void)
 {
+#ifdef DEBUG_PRINT_INSTRUCTION
+	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+#endif // DEBUG_PRINT_INSTRUCTION
 	switch(memory[pc]) {
 	case 0x49: // immediate
 		LOCAL_EOR(2,2,Addr_IMM()); break;
@@ -68,6 +71,9 @@ void SYSTEM65CORE System65::Insn_EOR(void)
 	pc += isize
 void SYSTEM65CORE System65::Insn_ORA(void)
 {
+#ifdef DEBUG_PRINT_INSTRUCTION
+	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+#endif // DEBUG_PRINT_INSTRUCTION
 	switch(memory[pc]) {
 	case 0x09: // immediate
 		LOCAL_ORA(2,2,Addr_IMM()); break;
@@ -93,6 +99,9 @@ void SYSTEM65CORE System65::Insn_ORA(void)
 
 void SYSTEM65CORE System65::Insn_BIT(void)
 {
+#ifdef DEBUG_PRINT_INSTRUCTION
+	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+#endif // DEBUG_PRINT_INSTRUCTION
 	uint8_t val;
 	switch (memory[pc]) {
 	case 0x24: // zeropage

@@ -8,8 +8,11 @@
 	pc += isize
 void SYSTEM65CORE System65::Insn_ADC(void)
 {
-	// TODO: BCD mode add
-	uint16_t val;
+#ifdef DEBUG_PRINT_INSTRUCTION
+	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+#endif // DEBUG_PRINT_INSTRUCTION
+	// Status: coding complete, needs testing
+	uint16_t val,nval;
 	switch(memory[pc]) {
 	case 0x69: // immediate
 		LOCAL_LOADVAL(2,2,Addr_IMM()); break;
@@ -31,21 +34,36 @@ void SYSTEM65CORE System65::Insn_ADC(void)
 		INSN_DECODE_ERROR(); return;
 	}
 
-	// Add w/ carry
-	uint16_t nval = a + val + ((pf & System65::PFLAG_C) ? 1 : 0);
+	if (pf & System65::PFLAG_D) {
+		// BCD mode
+		uint16_t vala = (a & 0x0f) + (val & 0x0f) + (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
+		if (vala > 9)
+			vala = ((vala + 6) & 0x0f) + 16;
 
-	// Set flags
-	if (nval > 0xff) // carry
-		pf |= System65::PFLAG_C;
+		uint16_t valb = (a & 0xf0) + (val & 0xf0) + vala;
+		if (valb > 160)
+			valb += 96;
 
-	if (nval == 0) // zero
-		pf |= System65::PFLAG_Z;
+		nval = (valb & 0xff);
 
-	if (((nval^a)&(nval^val)&0x80) > 0) // overflow
-		pf |= System65::PFLAG_V;
+		Helper_SetClearC((valb > 100));
+		Helper_ClearFlag(System65::PFLAG_V);
+	} else {
+		// Non-BCD mode
+		// Add w/ carry
+		nval = a + val + (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
 
-	if (nval & 0b10000000) // negative
-		pf |= System65::PFLAG_N;
+		// Set flags
+		Helper_SetClearC((nval > 0xff));
+		Helper_SetClearZ((nval == 0));
+
+
+		if (((nval^a)&(nval^val)&0x80) > 0) // overflow
+			Helper_SetFlag(System65::PFLAG_V); // FIXME: Does this need to be set?
+
+		if (nval & 0b10000000) // negative
+			Helper_SetFlag(System65::PFLAG_N);
+	}
 
 	// write
 	a = (uint8_t)nval;
@@ -53,6 +71,9 @@ void SYSTEM65CORE System65::Insn_ADC(void)
 
 void SYSTEM65CORE System65::Insn_SBC(void)
 {
+#ifdef DEBUG_PRINT_INSTRUCTION
+	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+#endif // DEBUG_PRINT_INSTRUCTION
 	// TODO: BCD mode subtract
 	uint16_t val;
 	switch(memory[pc]) {
@@ -98,6 +119,9 @@ void SYSTEM65CORE System65::Insn_SBC(void)
 
 void SYSTEM65CORE System65::Insn_CMP(void)
 {
+#ifdef DEBUG_PRINT_INSTRUCTION
+	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+#endif // DEBUG_PRINT_INSTRUCTION
 	uint8_t val;
 	switch (memory[pc]) {
 	case 0xc9: // immediate
@@ -132,6 +156,9 @@ void SYSTEM65CORE System65::Insn_CMP(void)
 
 void SYSTEM65CORE System65::Insn_CPX(void)
 {
+#ifdef DEBUG_PRINT_INSTRUCTION
+	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+#endif // DEBUG_PRINT_INSTRUCTION
 	uint8_t val;
 	switch(memory[pc]) {
 	case 0xe0: // immediate
@@ -156,6 +183,9 @@ void SYSTEM65CORE System65::Insn_CPX(void)
 
 void SYSTEM65CORE System65::Insn_CPY(void)
 {
+#ifdef DEBUG_PRINT_INSTRUCTION
+	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+#endif // DEBUG_PRINT_INSTRUCTION
 	uint8_t val;
 	switch(memory[pc]) {
 	case 0xc0: // immediate

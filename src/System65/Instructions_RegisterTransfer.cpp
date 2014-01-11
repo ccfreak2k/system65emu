@@ -4,6 +4,9 @@
 
 void SYSTEM65CORE System65::Insn_TAX(void)
 {
+#ifdef DEBUG_PRINT_INSTRUCTION
+	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+#endif // DEBUG_PRINT_INSTRUCTION
 #if _DEBUG
 	ASSERT_INSN(0xaa);
 #endif // _DEBUG
@@ -13,6 +16,9 @@ void SYSTEM65CORE System65::Insn_TAX(void)
 
 void SYSTEM65CORE System65::Insn_TAY(void)
 {
+#ifdef DEBUG_PRINT_INSTRUCTION
+	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+#endif // DEBUG_PRINT_INSTRUCTION
 #if _DEBUG
 	ASSERT_INSN(0xa8);
 #endif // _DEBUG
@@ -22,6 +28,9 @@ void SYSTEM65CORE System65::Insn_TAY(void)
 
 void SYSTEM65CORE System65::Insn_TXA(void)
 {
+#ifdef DEBUG_PRINT_INSTRUCTION
+	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+#endif // DEBUG_PRINT_INSTRUCTION
 #if _DEBUG
 	ASSERT_INSN(0x8a);
 #endif // _DEBUG
@@ -31,6 +40,9 @@ void SYSTEM65CORE System65::Insn_TXA(void)
 
 void SYSTEM65CORE System65::Insn_TYA(void)
 {
+#ifdef DEBUG_PRINT_INSTRUCTION
+	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+#endif // DEBUG_PRINT_INSTRUCTION
 #if _DEBUG
 	ASSERT_INSN(0x98);
 #endif // _DEBUG

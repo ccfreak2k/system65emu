@@ -17,6 +17,9 @@
 	pc += isize
 void SYSTEM65CORE System65::Insn_ASL(void)
 {
+#ifdef DEBUG_PRINT_INSTRUCTION
+	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+#endif // DEBUG_PRINT_INSTRUCTION
 	uint16_t addr;
 	switch(memory[pc]) {
 	case 0x0a: // accumulator
@@ -62,6 +65,9 @@ void SYSTEM65CORE System65::Insn_ASL(void)
 		pc += isize
 void SYSTEM65CORE System65::Insn_LSR(void)
 {
+#ifdef DEBUG_PRINT_INSTRUCTION
+	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+#endif // DEBUG_PRINT_INSTRUCTION
 	uint16_t addr;
 	switch (memory[pc]) {
 	case 0x4a: // accumulator
@@ -109,6 +115,9 @@ void SYSTEM65CORE System65::Insn_LSR(void)
 		pc += isize
 void SYSTEM65CORE System65::Insn_ROL(void)
 {
+#ifdef DEBUG_PRINT_INSTRUCTION
+	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+#endif // DEBUG_PRINT_INSTRUCTION
 	uint16_t addr;
 	bool carry;
 	switch (memory[pc]) {
@@ -162,6 +171,9 @@ void SYSTEM65CORE System65::Insn_ROL(void)
 		pc += isize
 void SYSTEM65CORE System65::Insn_ROR(void)
 {
+#ifdef DEBUG_PRINT_INSTRUCTION
+	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+#endif // DEBUG_PRINT_INSTRUCTION
 	uint16_t addr;
 	bool carry;
 	switch (memory[pc]) {

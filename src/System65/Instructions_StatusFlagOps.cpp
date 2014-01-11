@@ -14,6 +14,9 @@
 
 void SYSTEM65CORE System65::Insn_CLC(void)
 {
+#ifdef DEBUG_PRINT_INSTRUCTION
+	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+#endif // DEBUG_PRINT_INSTRUCTION
 #if _DEBUG
 	ASSERT_INSN(0x18);
 #endif // _DEBUG
@@ -22,6 +25,9 @@ void SYSTEM65CORE System65::Insn_CLC(void)
 
 void SYSTEM65CORE System65::Insn_CLD(void)
 {
+#ifdef DEBUG_PRINT_INSTRUCTION
+	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+#endif // DEBUG_PRINT_INSTRUCTION
 #if _DEBUG
 	ASSERT_INSN(0xd8);
 #endif // _DEBUG
@@ -30,6 +36,9 @@ void SYSTEM65CORE System65::Insn_CLD(void)
 
 void SYSTEM65CORE System65::Insn_CLI(void)
 {
+#ifdef DEBUG_PRINT_INSTRUCTION
+	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+#endif // DEBUG_PRINT_INSTRUCTION
 #if _DEBUG
 	ASSERT_INSN(0x58);
 #endif // _DEBUG
