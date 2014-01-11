@@ -34,22 +34,22 @@ System65::~System65()
 	delete [] memory;
 }
 
-void System65::LoadProgram(void *progmem, unsigned int progsize)
+void System65::LoadProgram(void *progmem, unsigned int progsize, unsigned int offset)
 {
 	if (progmem == NULL)
 		return;
 	if (progsize == 0)
 		return;
 
-	memcpy(&memory[0x200],(uint8_t*)progmem,(size_t)((65536-512) < progsize ? (65536-512) : progsize));
+	memcpy(&memory[offset],(uint8_t*)progmem,(size_t)((65536-offset) < progsize ? (65536-offset) : progsize));
 }
 
-void System65::LoadProgram(FILE *progfile)
+void System65::LoadProgram(FILE *progfile, unsigned int offset)
 {
 	if (progfile == NULL)
 		return;
 
-	fread(&memory[0x200],sizeof(uint8_t),(65536-512),progfile);
+	fread(&memory[offset],sizeof(uint8_t),(65536-offset),progfile);
 }
 
 void System65::Tick(void)

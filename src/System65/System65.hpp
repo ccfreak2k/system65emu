@@ -48,7 +48,11 @@
  * \todo A pointer table might be faster than a switch for instruction decoding.
  */
 
-/** \def FASTEMU When defined, functions will be inlined for speed. May increase code size heavily. */
+/** \def FASTEMU When defined, functions will be inlined for speed. May increase code size heavily.
+ *
+ * \note Best to leave this disabled, as gcc can only inline from functions
+ * within the same compilation unit.
+ */
 #ifdef FASTEMU
 	#define SYSTEM65CORE inline
 #else
@@ -206,10 +210,14 @@ class System65
 		 * will return when either the maximum amount of data has been loaded or
 		 * the limit specified by progsize has been reached.
 		 *
+		 * \note offset is currently not bounds-checked.
+		 *
 		 * \param[in] progmem Program data to load into emulator memory
 		 * \param[in] progsize Size of the program data, in bytes
+		 * \param[in] offset The address in memory that the binary should be
+		 * loaded to.
 		 */
-		void LoadProgram(void *progmem, unsigned int progsize);
+		void LoadProgram(void *progmem, unsigned int progsize, unsigned int offset = 0x200);
 
 		/** Loads a program into memory from a file
 		 *
@@ -218,10 +226,14 @@ class System65
 		 * memory. The function will return when either the maximum amount of
 		 * data has been loaded or the end of the file has been reached.
 		 *
+		 * \note offset is currently not bounds-checked.
+		 *
 		 * \param[in] progfile File handle to a file to load into emulator
 		 * memory
+		 * \param[in] offset The address in memory that the binary should be
+		 * loaded to.
 		 */
-		void LoadProgram(FILE *progfile);
+		void LoadProgram(FILE *progfile, unsigned int offset = 0x200);
 
 		uint8_t *memory; //!< Pointer to system memory for this system
 		unsigned int memorysize; //!< Size of memory for this system.
@@ -253,7 +265,7 @@ class System65
 			PFLAG_Z = 0x02, //!< Result-is-zero flag
 			PFLAG_I = 0x04, //!< Interrupt (IRQ disable)
 			PFLAG_D = 0x08, //!< Decimal mode flag
-			PFLAG_B = 0x10, //!< Break
+			PFLAG_B = 0x10, //!< Break, is only set when stored on the stack
 			PFLAG_R = 0x20, //!< Reserved (always 1)
 			PFLAG_V = 0x40, //!< Overflow flag
 			PFLAG_N = 0x80  //!< Negative flag
@@ -489,6 +501,29 @@ class System65
 		 * \param[in] flag Flag to clear
 		 */
 		void SYSTEM65CORE Helper_ClearFlag(System65::PFLAGS flag); //!< Clears a processor state flag
+
+		/**
+		 * This method returns whether or not the given flag bit is set.
+		 *
+		 * \param[in] flag Flag to query the state of
+		 *
+		 * \return true if flag is set, false if flag is cleared
+		 */
+		bool SYSTEM65CORE Helper_GetFlag(System65::PFLAGS flag); //!< Queries the state of a flag
+
+		/**
+		 * This method sets or clears the C flag depending on the value of val.
+		 *
+		 * \param[in] val When true, the C flag is set; when false, the C flag is cleared.
+		 */
+		void SYSTEM65CORE Helper_SetClearC(bool val); //!< Sets or clears the C flag
+
+		/**
+		 * This method sets or clears the Z flag depending on the value of val.
+		 *
+		 * \param[in] val When true, the Z flag is set; when false, the Z flag is cleared.
+		 */
+		void SYSTEM65CORE Helper_SetClearZ(bool val); //!< Sets or clears the Z flag
 
 		/** @} */
 
