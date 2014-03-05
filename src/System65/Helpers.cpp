@@ -13,7 +13,8 @@ void SYSTEM65CORE System65::Helper_Set_ZN_Flags(uint8_t reg)
 
 void SYSTEM65CORE System65::Helper_PushByte(uint8_t val)
 {
-	memory[m_StackBase+(--s)] = val;
+	s--;
+	memory[m_StackBase+s] = val;
 }
 
 void SYSTEM65CORE System65::Helper_PushWord(uint16_t val)
@@ -24,13 +25,16 @@ void SYSTEM65CORE System65::Helper_PushWord(uint16_t val)
 
 uint8_t SYSTEM65CORE System65::Helper_PopByte(void)
 {
-	return memory[m_StackBase+(s++)];
+	uint8_t val = memory[m_StackBase+s];
+	s++;
+	return val;
 }
 
 uint16_t SYSTEM65CORE System65::Helper_PopWord(void)
 {
 	uint16_t val = Helper_PopByte();
-	return val + (Helper_PopByte() << 8);
+	val += (Helper_PopByte() << 8);
+	return val;
 }
 
 void SYSTEM65CORE System65::Helper_SetBranch(bool branch)
@@ -38,10 +42,12 @@ void SYSTEM65CORE System65::Helper_SetBranch(bool branch)
 	m_CycleCount += 2;
 	if (branch) {
 		m_CycleCount++;
+		// on a real 6502, pc is incremented after instruction fetching
+		// and blah whatever so we have to add two bytes to the relative jump
+		// destination for it to work right.
 		pc += (int8_t)memory[pc+1];
-	} else {
-		pc += 2;
 	}
+	pc += 2;
 }
 
 uint8_t SYSTEM65CORE System65::Helper_PeekByte(uint16_t addr)

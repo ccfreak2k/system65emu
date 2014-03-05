@@ -2,6 +2,9 @@
 
 // Address modes
 
+// Each of these methods returns a 16-bit index (i.e. a pointer) into emulator
+// memory for the operand of the instruction in question.
+
 // Accumulator
 uint8_t SYSTEM65CORE System65::Addr_ACC(void){ assert(false); }
 
