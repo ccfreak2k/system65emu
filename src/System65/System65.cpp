@@ -342,6 +342,10 @@ void SYSTEM65CORE System65::Dispatch(void)
 		Insn_DEX();
 		break;
 
+	case 0x88: // DEY
+		Insn_DEY();
+		break;
+
 	// ======
 	// SHIFTS
 	// ======
