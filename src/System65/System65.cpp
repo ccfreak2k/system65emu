@@ -6,7 +6,7 @@
 
 System65::System65(unsigned int memsize) :
 	m_CycleCount(0),
-	m_StackBase(0x0200),
+	m_StackBase(0x0100),
 	a(0x00),
 	x(0x00),
 	y(0x00),
