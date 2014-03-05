@@ -12,6 +12,7 @@ void SYSTEM65CORE System65::Insn_BRK(void)
 #endif // _DEBUG
 	// PC, FLAGS
 	m_CycleCount += 7;
+	Helper_SetFlag(System65::PFLAG_B);
 	Helper_PushWord(pc);
 	Helper_PushByte(pf);
 	pc = Helper_PeekWord(0xFFFE);
