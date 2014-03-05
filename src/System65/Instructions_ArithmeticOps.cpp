@@ -12,7 +12,7 @@ void SYSTEM65CORE System65::Insn_ADC(void)
 	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
 #endif // DEBUG_PRINT_INSTRUCTION
 	// Status: coding complete, needs testing
-	uint16_t val,nval;
+	int16_t val,nval;
 	switch(memory[pc]) {
 	case 0x69: // immediate
 		LOCAL_LOADVAL(2,2,Addr_IMM()); break;
@@ -34,13 +34,13 @@ void SYSTEM65CORE System65::Insn_ADC(void)
 		INSN_DECODE_ERROR(); return;
 	}
 
-	if (pf & System65::PFLAG_D) {
+	if (Helper_GetFlag(System65::PFLAG_D) != 0) {
 		// BCD mode
-		uint16_t vala = (a & 0x0f) + (val & 0x0f) + (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
+		int16_t vala = (a & 0x0f) + (val & 0x0f) + (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
 		if (vala > 9)
 			vala = ((vala + 6) & 0x0f) + 16;
 
-		uint16_t valb = (a & 0xf0) + (val & 0xf0) + vala;
+		int16_t valb = (a & 0xf0) + (val & 0xf0) + vala;
 		if (valb > 160)
 			valb += 96;
 
@@ -51,18 +51,47 @@ void SYSTEM65CORE System65::Insn_ADC(void)
 	} else {
 		// Non-BCD mode
 		// Add w/ carry
-		nval = a + val + (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
+		//nval = a + val + (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
+		nval = (val & 0xff) + (a & 0xff) + (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
+		int16_t val6 = (val & 0x7f) + (a & 0x7f) + (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
 
 		// Set flags
-		Helper_SetClearC((nval > 0xff));
+		//Helper_SetClearC((nval > 0xff));
+		//Helper_SetClearZ((nval == 0));
+		Helper_SetClearC((val & 0x100) != 0);
 		Helper_SetClearZ((nval == 0));
 
+		// Overflow occurs when the result is outside of the range -128 - 127.
+		// Here are some examples:
+		//    1 +  1 =    2, V = 0
+		//    1 + -1 =    0, V = 0
+		//  127 +  1 =  128, V = 1
+		// -128 + -1 = -129, V = 1
+		//  127 + -1 =  128, V = 1
+		// Many emulators use some bitwise operations to check the value, but
+		// here I use a simple if/then block to ensure correctness.
+		// testadc.asm tests ADC and SBC to see if V handling is done correctly.
+		//if ((nval < -128) || (nval > 127))
+		//	Helper_SetFlag(System65::PFLAG_V);
+		//else
+		//	Helper_ClearFlag(System65::PFLAG_V);
 
-		if (((nval^a)&(nval^val)&0x80) > 0) // overflow
-			Helper_SetFlag(System65::PFLAG_V); // FIXME: Does this need to be set?
+		// From symon on github
+		if (Helper_GetFlag(System65::PFLAG_C)^((val6 & 0x80) != 0))
+			Helper_SetFlag(System65::PFLAG_V);
+		else
+			Helper_ClearFlag(System65::PFLAG_V);
+
+		// Old method, from 65el02 emu
+		//if (((nval^a)&(nval^val)&0x80) > 0) // overflow
+		//	Helper_SetFlag(System65::PFLAG_V);
+		//else
+		//	Helper_ClearFlag(System65::PFLAG_V);
 
 		if (nval & 0b10000000) // negative
 			Helper_SetFlag(System65::PFLAG_N);
+		else
+			Helper_ClearFlag(System65::PFLAG_N);
 	}
 
 	// write
@@ -75,7 +104,7 @@ void SYSTEM65CORE System65::Insn_SBC(void)
 	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
 #endif // DEBUG_PRINT_INSTRUCTION
 	// TODO: BCD mode subtract
-	uint16_t val;
+	uint16_t val,nval;
 	switch(memory[pc]) {
 	case 0xe9: // immediate
 		LOCAL_LOADVAL(2,2,Addr_IMM()); break;
@@ -97,24 +126,40 @@ void SYSTEM65CORE System65::Insn_SBC(void)
 		INSN_DECODE_ERROR(); return;
 	}
 
-	// subtract w/ carry
-	uint16_t nval = a - val + ((pf & System65::PFLAG_C) ? 1 : 0) - 1;
+	if (Helper_GetFlag(System65::PFLAG_D) != 0) {
+	} else {
+		// subtract w/ carry
+		// TODO: Combine with ADC since both operations are largely the same.
+		//uint8_t carry = (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
+		//int16_t uval = a - val - carry;
+		//int16_t sval = (int8_t)a - (int8_t)val - carry;
+		nval = (~val & 0xff) + (a & 0xff) + (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
+		int16_t val6 = (~val & 0x7f) + (a & 0x7f) + (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
 
-	// Set flags
-	if (!(nval&0x100)) // carry
-		pf |= System65::PFLAG_C;
+		// Set flags
+		//Helper_SetClearC(uval > 127); // carry
+		//Helper_SetClearZ(uval == 0); // zero
+		Helper_SetClearC((val & 0x100) != 0);
+		Helper_SetClearZ((nval == 0));
 
-	if (nval == 0) // zero
-		pf |= System65::PFLAG_Z;
+		//if (((uval&0x80)>0)^((sval&0x100)!=0)) // Overflow
+		//if ((uval < -128) || (uval > 127))
+		//	Helper_SetFlag(System65::PFLAG_V);
+		//else
+		//	Helper_ClearFlag(System65::PFLAG_V);
+		if (Helper_GetFlag(System65::PFLAG_C)^((val6 & 0x80) != 0))
+			Helper_SetFlag(System65::PFLAG_V);
+		else
+			Helper_ClearFlag(System65::PFLAG_V);
 
-	if (((nval^a)&(nval^-val)&0x80) > 0) // Overflow
-		pf |= System65::PFLAG_V;
+		if (val & 0b10000000) // negative
+			Helper_SetFlag(System65::PFLAG_N);
+		else
+			Helper_ClearFlag(System65::PFLAG_N);
 
-	if (nval & 0b10000000) // negative
-		pf |= System65::PFLAG_N;
-
-	// write
-	a = (uint8_t)nval;
+		// write
+		a = (uint8_t)val;
+	}
 }
 
 void SYSTEM65CORE System65::Insn_CMP(void)
@@ -122,7 +167,7 @@ void SYSTEM65CORE System65::Insn_CMP(void)
 #ifdef DEBUG_PRINT_INSTRUCTION
 	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
 #endif // DEBUG_PRINT_INSTRUCTION
-	uint8_t val;
+	int8_t val;
 	switch (memory[pc]) {
 	case 0xc9: // immediate
 		LOCAL_LOADVAL(2,2,Addr_IMM()); break;
@@ -144,14 +189,14 @@ void SYSTEM65CORE System65::Insn_CMP(void)
 		INSN_DECODE_ERROR(); return;
 	}
 
-	if (a >= val) // carry
-		pf |= System65::PFLAG_C;
+	Helper_SetClearC((int8_t)a >= val); // carry
 
-	if (a == val) // zero
-		pf |= System65::PFLAG_Z;
+	Helper_SetClearZ((int8_t)a == val); // zero
 
-	if ((a - val) < 0) // negative
-		pf |= System65::PFLAG_N;
+	if (((int8_t)a - val) < 0) // negative
+		Helper_SetFlag(System65::PFLAG_N);
+	else
+		Helper_ClearFlag(System65::PFLAG_N);
 }
 
 void SYSTEM65CORE System65::Insn_CPX(void)
