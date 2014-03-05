@@ -261,14 +261,65 @@ class System65
 
 		/** Processor flags */
 		enum PFLAGS {
-			PFLAG_C = 0x01, //!< Carry flag
-			PFLAG_Z = 0x02, //!< Result-is-zero flag
-			PFLAG_I = 0x04, //!< Interrupt (IRQ disable)
-			PFLAG_D = 0x08, //!< Decimal mode flag
-			PFLAG_B = 0x10, //!< Break, is only set when stored on the stack
+			/** Carry flag
+			 *
+			 * The carry flag is set if the last operation caused an overflow
+			 * from bit 7 of the result or an underflow from bit 0. This
+			 * condition is set during arithmetic, comparison and during logical
+			 * shifts. It can be explicitly set using the Set Carry Flag (SEC)
+			 * instruction and cleared with Clear Carry Flag (CLC).
+			 */
+			PFLAG_C = 0x01,
+
+			/** Zero flag
+			 *
+			 * The zero flag is set if the result of the last operation was zero.
+			 */
+			PFLAG_Z = 0x02,
+
+			/** Interrupt Disable flag
+			 *
+			 * The interrupt disable flag is set if the program has executed a
+			 * Set Interrupt Disable (SEI) instruction. While this flag is set
+			 * the processor will not respond to interrupts from devices until
+			 * it is cleared by a Clear Interrupt Disable (CLI) instruction.
+			 */
+			PFLAG_I = 0x04,
+
+			/** Decimal Mode flag
+			 *
+			 * While the decimal mode flag is set the processor will obey the
+			 * rules of Binary Coded Decimal (BCD) arithmetic during addition
+			 * and subtraction. The flag can be explicitly set using Set Decimal
+			 * Flag (SED) and cleared with Clear Decimal Flag (CLD).
+			 */
+			PFLAG_D = 0x08,
+
+			/** Break flag
+			 *
+			 * The break command bit is set when a BRK instruction has been
+			 * executed and an interrupt has been generated to process it.
+			 */
+			PFLAG_B = 0x10,
+
 			PFLAG_R = 0x20, //!< Reserved (always 1)
-			PFLAG_V = 0x40, //!< Overflow flag
-			PFLAG_N = 0x80  //!< Negative flag
+
+			/** Overflow flag
+			 *
+			 * The overflow flag is set during arithmetic operations if the
+			 * result has yielded an invalid 2's complement result (e.g. adding
+			 * to positive numbers and ending up with a negative result: 64 + 64
+			 * => -128). It is determined by looking at the carry between bits 6
+			 * and 7 and between bit 7 and the carry flag.
+			 */
+			PFLAG_V = 0x40,
+
+			/** Negative flag
+			 *
+			 * The negative flag is set if the result of the last operation had
+			 * bit 7 set.
+			 */
+			PFLAG_N = 0x80
 		};
 
 		/** \defgroup addressmodes  Memory addressing modes
