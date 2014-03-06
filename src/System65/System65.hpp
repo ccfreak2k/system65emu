@@ -37,10 +37,15 @@
  * execution to a certain extent. Passing a value of 0 will cause \ref Tick to
  * return immediately, and no instructions will be executed.
  *
- * \author ccfreak2k
+ * Some future ideas:
  *
- * \todo Add mutex to lock machine state while running (e.g. GetRegister_*()
- * calls block)
+ * * Turn the memory[] array into a general "bus" and give pointer/size to
+ *   devices that want memory, in addition to main memory being allocated out of
+ *   the same pool. OOB access wouldn't be an issue anymore, since in the worst
+ *   case a value is read/written from actual memory as the pointers are 16 bits
+ *   anyway.
+ *
+ * \author ccfreak2k
  *
  * \todo Increment the cycle count in each stage of execution (allows for
  * accurate cycle penalty for cross-page reads).
