@@ -33,9 +33,9 @@ void SYSTEM65CORE System65::Insn_JSR(void)
 
 	m_CycleCount += 6;
 	Helper_PushWord(pc+2);
-	printf("[DEBUG] pc = 0x%.4X\n", pc);
+	//printf("[DEBUG] pc = 0x%.4X\n", pc);
 	pc = Addr_ABS();
-	printf("[DEBUG] pc = 0x%.4X\n", pc);
+	//printf("[DEBUG] pc = 0x%.4X\n", pc);
 }
 
 void SYSTEM65CORE System65::Insn_RTS(void)
@@ -48,7 +48,7 @@ void SYSTEM65CORE System65::Insn_RTS(void)
 #endif // _DEBUG
 
 	m_CycleCount += 6;
-	printf("[DEBUG] pc = 0x%.2X\n", pc);
+	//printf("[DEBUG] pc = 0x%.2X\n", pc);
 	pc = Helper_PopWord()+1;
-	printf("[DEBUG] pc = 0x%.2X\n", pc);
+	//printf("[DEBUG] pc = 0x%.2X\n", pc);
 }
