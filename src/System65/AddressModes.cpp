@@ -5,6 +5,10 @@
 // Each of these methods returns a 16-bit index (i.e. a pointer) into emulator
 // memory for the operand of the instruction in question.
 
+// The Accumulator (Addr_ACC) and Relative (Addr_REL) modes do not use a memory
+// index, so calling the respective methods is an error. They are here simply
+// for completion and as placeholders for possible future refactoring.
+
 // Accumulator
 uint8_t SYSTEM65CORE System65::Addr_ACC(void){ assert(false); }
 
