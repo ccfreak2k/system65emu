@@ -40,6 +40,11 @@ void SYSTEM65CORE System65::Insn_RTI(void)
 #endif // _DEBUG
 	m_CycleCount += 6;
 	pf = Helper_PopByte();
+	// Food for thought: The user can arbitrarily set flags while they're in
+	// memory. The B flag is only set when servicing a software (BRK-triggered)
+	// interrupt. With that in mind, is it proper to clear the B flag here, or
+	// does it need to keep the value from memory?
 	Helper_SetFlag(System65::PFLAG_R);
+	Helper_ClearFlag(System65::PFLAG_B);
 	pc = Helper_PopWord();
 }
