@@ -12,6 +12,7 @@ int main (int argc, char **argv)
 	// Make a System65 instance
 	System65 sys;
 
+	// TODO: Make file loading more C++-ey
 	int c;
 	FILE *progfile = NULL;
 	while ((c = getopt(argc,argv,"b:s:i:h")) != -1) {
@@ -206,7 +207,7 @@ void ShowHelp(void)
 	printf("Available options: \n");
 	// -b -s -i
 	printf("-b filename: Loads a file into program memory\n");
-	printf("-s 0xNN    : Sets the stack base to 0xNN00; default is 0x20\n");
+	printf("-s 0xNN    : Sets the stack base to 0xNN00; default is 0x01\n");
 	printf("-i 0xNNNN  : Sets the interrupt vector to 0xNNNN; default is 0xFFFE\n");
 	printf("-h         : Shows this help text\n");
 }
