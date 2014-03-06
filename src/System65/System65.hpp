@@ -1058,7 +1058,7 @@ class System65
 
 		/**
 		 * Flags affected:
-		 * * \ref V: Cleared
+		 * * V: Cleared
 		 */
 		void SYSTEM65CORE Insn_CLV(void); //!< Clear overflow flag
 
