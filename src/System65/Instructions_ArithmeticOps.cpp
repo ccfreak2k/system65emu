@@ -51,13 +51,10 @@ void SYSTEM65CORE System65::Insn_ADC(void)
 	} else {
 		// Non-BCD mode
 		// Add w/ carry
-		//nval = a + val + (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
 		nval = (val & 0xff) + (a & 0xff) + (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
 		int16_t val6 = (val & 0x7f) + (a & 0x7f) + (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
 
 		// Set flags
-		//Helper_SetClearC((nval > 0xff));
-		//Helper_SetClearZ((nval == 0));
 		Helper_SetClearC((val & 0x100) != 0);
 		Helper_SetClearZ((nval == 0));
 
@@ -68,25 +65,13 @@ void SYSTEM65CORE System65::Insn_ADC(void)
 		//  127 +  1 =  128, V = 1
 		// -128 + -1 = -129, V = 1
 		//  127 + -1 =  128, V = 1
-		// Many emulators use some bitwise operations to check the value, but
-		// here I use a simple if/then block to ensure correctness.
 		// testadc.asm tests ADC and SBC to see if V handling is done correctly.
-		//if ((nval < -128) || (nval > 127))
-		//	Helper_SetFlag(System65::PFLAG_V);
-		//else
-		//	Helper_ClearFlag(System65::PFLAG_V);
 
 		// From symon on github
 		if (Helper_GetFlag(System65::PFLAG_C)^((val6 & 0x80) != 0))
 			Helper_SetFlag(System65::PFLAG_V);
 		else
 			Helper_ClearFlag(System65::PFLAG_V);
-
-		// Old method, from 65el02 emu
-		//if (((nval^a)&(nval^val)&0x80) > 0) // overflow
-		//	Helper_SetFlag(System65::PFLAG_V);
-		//else
-		//	Helper_ClearFlag(System65::PFLAG_V);
 
 		if (nval & 0b10000000) // negative
 			Helper_SetFlag(System65::PFLAG_N);
@@ -130,23 +115,14 @@ void SYSTEM65CORE System65::Insn_SBC(void)
 	} else {
 		// subtract w/ carry
 		// TODO: Combine with ADC since both operations are largely the same.
-		//uint8_t carry = (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
-		//int16_t uval = a - val - carry;
-		//int16_t sval = (int8_t)a - (int8_t)val - carry;
 		nval = (~val & 0xff) + (a & 0xff) + (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
 		int16_t val6 = (~val & 0x7f) + (a & 0x7f) + (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
 
 		// Set flags
-		//Helper_SetClearC(uval > 127); // carry
-		//Helper_SetClearZ(uval == 0); // zero
 		Helper_SetClearC((val & 0x100) != 0);
 		Helper_SetClearZ((nval == 0));
 
-		//if (((uval&0x80)>0)^((sval&0x100)!=0)) // Overflow
-		//if ((uval < -128) || (uval > 127))
-		//	Helper_SetFlag(System65::PFLAG_V);
-		//else
-		//	Helper_ClearFlag(System65::PFLAG_V);
+		// Overflow
 		if (Helper_GetFlag(System65::PFLAG_C)^((val6 & 0x80) != 0))
 			Helper_SetFlag(System65::PFLAG_V);
 		else
