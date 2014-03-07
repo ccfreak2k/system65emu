@@ -10,7 +10,7 @@
 // for completion and as placeholders for possible future refactoring.
 
 // Accumulator
-uint8_t SYSTEM65CORE System65::Addr_ACC(void){ assert(false); }
+uint8_t SYSTEM65CORE System65::Addr_ACC(void){ assert(false); return 0; }
 
 // Absolute
 uint16_t SYSTEM65CORE System65::Addr_ABS(void)
@@ -71,7 +71,7 @@ uint16_t SYSTEM65CORE System65::Addr_INY(void)
 }
 
 // Relative
-uint16_t SYSTEM65CORE System65::Addr_REL(void){ assert(false); }
+uint16_t SYSTEM65CORE System65::Addr_REL(void){ assert(false); return 0; }
 
 // Zeropage
 uint16_t SYSTEM65CORE System65::Addr_ZPG(void)
