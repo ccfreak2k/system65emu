@@ -1,12 +1,11 @@
 #include "S65COP.hpp"
 
-S65COP::S65COP(uint8_t *membus, uint8_t base) :
+S65COP::S65COP(uint8_t *base) :
 	vx(),
 	vy(),
 	ix(0),
 	iy(0),
 	scratch(new uint8_t[0x80]),
-	sysmem(membus),
 	cmdbuf(base),
 	cmdptr(0)
 {
@@ -16,4 +15,15 @@ S65COP::S65COP(uint8_t *membus, uint8_t base) :
 S65COP::~S65COP()
 {
 	delete scratch;
+}
+
+void S65COP::Tick(void)
+{
+	// pre-exec
+	if (cmdbus[ADDR_EXECUTE] == 0x00)
+		return;
+
+	// post-exec
+	if (cmdptr > 0x7F)
+		cmdptr = 0x00;
 }

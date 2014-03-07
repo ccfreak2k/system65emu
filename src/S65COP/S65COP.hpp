@@ -5,6 +5,15 @@
  * Interface for the \ref S65COP class.
  */
 
+/** Address from which the "run" command is read/written
+ *
+ * Setting this to !0x00 tells the coprocessor to being executing the commands
+ * in the command buffer. When the coprocessor reaches the end, it will set this
+ * value to 0x00. If the value is set by the CPU to 0x00 during COP execution,
+ * the execution will stop before the next instruction is run.
+ */
+#define ADDR_EXECUTE 0xF0
+
 /** \class S65COP
  * The System65 Coprocessor class.
  *
@@ -36,7 +45,9 @@
  * following:
  *
  * 0x00-0x7F (128 bytes): Command and immediate data buffer
+ *
  * 0x80-0xEF (112 bytes): Result output storage
+ *
  * 0xF0-0xFF (8 bytes): Command and status registers
  *
  * \section insns Coprocessor Instructions
@@ -54,12 +65,13 @@
  * * SVX: Store VX into the output buffer
  * * SVY: Store VY into the output buffer
  * * SVS: Store a vector from scratch space into the output buffer
- * * MII: Multiply integer with integer
- * * MIV: Multiply integer with vector
- * * MVV: Multiply vector with vector
- * * DII: Divide integer with integer
- * * DIV: Divide integer with vector
- * * DVV: Divide vector with vector
+ * * AII/AIV/AVV: Add integers and vectors
+ * * SII/SIV/SVV: Subtract integers and vectors
+ * * MII/MIV/MVV: Multiply integers and vectors
+ * * DII/DIV/DVV: Divide integers and vectors
+ * * DOT: Dot product of two vectors
+ * * CRS: Cross product of two vectors
+ * * MID: Calculates the midpoint of two vectors
  *
  * \section futureideas Future Ideas
  *
@@ -80,9 +92,12 @@ class S65COP
 		 * \param[in] membus Pointer to the system memory bus
 		 * \param[in] base Base address for the command buffer
 		 */
-		S65COP(uint8_t *membus, uint8_t base);
+		S65COP(uint8_t *base);
 		/** Uninitializes this coprocessor */
 		~S65COP();
+
+		/** Run one tick of the coprocessor. A tick may comprise more than one cycle. */
+		void Tick(void);
 	protected:
 	private:
 		/** Vector register typedef */
@@ -97,8 +112,7 @@ class S65COP
 		uint16_t iy; //!< Second integer register
 		uint8_t *scratch; //!< Internal RAM scratch space
 
-		uint8_t *sysmem; //!< System memory bus
-		uint8_t *cmdbuf; //!< Command buffer page
+		uint8_t *cmdbuf; //!< Command buffer page in system memory
 		uint8_t  cmdptr; //!< Pointer within cmdbuf to the next data to read
 };
 
