@@ -14,7 +14,7 @@
  * Interface for the \ref System65 class.
  */
 
-/**
+/** \class System65
  * The System65 class.
  *
  * This class is the class that represents a System65 computer as a whole. It
@@ -44,6 +44,12 @@
  *   the same pool. OOB access wouldn't be an issue anymore, since in the worst
  *   case a value is read/written from actual memory as the pointers are 16 bits
  *   anyway.
+ *
+ * * Extensions for memory management and/or vector computation. This is rather
+ *   complicated by the fact that the 6502 lacks hardware multiplication
+ *   support, instead relying on the programmer to code their own
+ *   implementation. Perhaps instead we could add ATC (Add Triple with Carry)
+ *   and STC (Subtract Triple with Carry) and leave the rest to the programmers.
  *
  * \author ccfreak2k
  *
@@ -243,7 +249,7 @@ class System65
 		uint8_t *memory; //!< Pointer to system memory for this system
 		unsigned int memorysize; //!< Size of memory for this system.
 
-		sf::Mutex m_mutMachine; //!< Mutex protecting the machine state.
+		sf::Mutex m_mutMachine; //!< Mutex protecting the machine state. \todo Replace with generic wrapper
 
 	protected:
 	private:
