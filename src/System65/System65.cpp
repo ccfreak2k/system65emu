@@ -36,20 +36,24 @@ System65::~System65()
 
 void System65::LoadProgram(void *progmem, unsigned int progsize, unsigned int offset)
 {
+	m_mutMachine.lock();
 	if (progmem == NULL)
 		return;
 	if (progsize == 0)
 		return;
 
 	memcpy(&memory[offset],(uint8_t*)progmem,(size_t)((65536-offset) < progsize ? (65536-offset) : progsize));
+	m_mutMachine.unlock();
 }
 
 void System65::LoadProgram(FILE *progfile, unsigned int offset)
 {
+	m_mutMachine.lock();
 	if (progfile == NULL)
 		return;
 
 	fread(&memory[offset],sizeof(uint8_t),(65536-offset),progfile);
+	m_mutMachine.unlock();
 }
 
 void System65::Tick(void)
