@@ -1,3 +1,7 @@
+; Original code below by Bruce Clark
+; Found here:
+; http://www.6502.org/tutorials/decimal_mode.html
+
 ; Demonstrate that the V flag works as described
 ;
 ; Returns with ERROR = 0 if the test passes, ERROR = 1 if the test fails
