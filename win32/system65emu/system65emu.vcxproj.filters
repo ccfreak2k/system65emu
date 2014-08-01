@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\S65COP">
+      <UniqueIdentifier>{86c133cf-bf56-42a0-975d-50b1d787dfb0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\System65">
+      <UniqueIdentifier>{0b2fc390-0e38-4b4d-89d6-e9f7fd095990}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\System65">
+      <UniqueIdentifier>{146e24a8-7381-4520-8474-0f5d93fbedb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\S65COP">
+      <UniqueIdentifier>{5e779cfe-1d1f-47db-865d-6a65588eff96}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\main.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\SFMLContext.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\System65\System65.hpp">
+      <Filter>Header Files\System65</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\S65COP\S65COP.hpp">
+      <Filter>Header Files\S65COP</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\S65COP\S65COP.cpp">
+      <Filter>Source Files\S65COP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\System65\AddressModes.cpp">
+      <Filter>Source Files\System65</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\System65\Helpers.cpp">
+      <Filter>Source Files\System65</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\System65\Instructions_ArithmeticOps.cpp">
+      <Filter>Source Files\System65</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\System65\Instructions_Branches.cpp">
+      <Filter>Source Files\System65</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\System65\Instructions_IncDec.cpp">
+      <Filter>Source Files\System65</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\System65\Instructions_JumpsCalls.cpp">
+      <Filter>Source Files\System65</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\System65\Instructions_LoadStore.cpp">
+      <Filter>Source Files\System65</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\System65\Instructions_LogicalOps.cpp">
+      <Filter>Source Files\System65</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\System65\Instructions_RegisterTransfer.cpp">
+      <Filter>Source Files\System65</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\System65\Instructions_Shifts.cpp">
+      <Filter>Source Files\System65</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\System65\Instructions_Stack.cpp">
+      <Filter>Source Files\System65</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\System65\Instructions_StatusFlagOps.cpp">
+      <Filter>Source Files\System65</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\System65\Instructions_System.cpp">
+      <Filter>Source Files\System65</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\System65\System65.cpp">
+      <Filter>Source Files\System65</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\SFMLContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
