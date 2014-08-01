@@ -3,8 +3,16 @@
 
 // Standard libs
 #ifdef WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+	#define WIN32_LEAN_AND_MEAN
+	#ifdef _MSC_VER
+		#define _CRT_SECURE_NO_WARNINGS
+	#endif
+	#include <windows.h>
+	#ifdef __MINGW__
+		#include <unistd.h>
+	#else // probably msvc
+		#include <stdint.h>
+	#endif
 #endif // WIN32
 
 #ifdef __cplusplus
@@ -12,8 +20,6 @@
 #else
     #include <stdlib.h>
 #endif // __cplusplus
-
-#include <unistd.h>
 
 // Class-related libs
 #include <SFML/Graphics.hpp>
@@ -63,16 +69,16 @@
 
 // (112x29 characters)
 
-// With an 8x16 font, this comes out to 896x464
+// With an 8x12 font, this comes out to 896x348
 
 // the memory viewer might be in a separate window, in which case the
 // disassembly and CPU status might as well move too.
 
 // The font file should be a texture atlas with 16x16 cells. Each cell should
-// have an 8x16 character in it. The atlas texture size should thus be 144x256
+// have an 8x12 character in it. The atlas texture size should thus be 128x192
 
 #define TEXCHAR_WIDTH 8 // w/h of a character
-#define TEXCHAR_HEIGHT 16
+#define TEXCHAR_HEIGHT 12
 #define SCREEN_WIDTH 80 // Monitor size, in characters
 #define SCREEN_HEIGHT 25
 #define EMUSCREEN_WIDTH 112 // Emulator total size, also in characters

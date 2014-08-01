@@ -73,7 +73,7 @@ void SYSTEM65CORE System65::Insn_ADC(void)
 		else
 			Helper_ClearFlag(System65::PFLAG_V);
 
-		if (nval & 0b10000000) // negative
+		if (nval & 0x80) // negative
 			Helper_SetFlag(System65::PFLAG_N);
 		else
 			Helper_ClearFlag(System65::PFLAG_N);
@@ -128,7 +128,7 @@ void SYSTEM65CORE System65::Insn_SBC(void)
 		else
 			Helper_ClearFlag(System65::PFLAG_V);
 
-		if (val & 0b10000000) // negative
+		if (val & 0x80) // negative
 			Helper_SetFlag(System65::PFLAG_N);
 		else
 			Helper_ClearFlag(System65::PFLAG_N);

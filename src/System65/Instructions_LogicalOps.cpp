@@ -121,12 +121,12 @@ void SYSTEM65CORE System65::Insn_BIT(void)
 		pf |= System65::PFLAG_Z;
 
     // TODO: Faster/more concise bit setting
-    if (val & 0b10000000)
+    if (val & 0x80)
 		pf |= System65::PFLAG_N;
 	else
 		pf &= ~System65::PFLAG_N;
 
-	if (val & 0b01000000)
+	if (val & 0x40)
 		pf |= System65::PFLAG_V;
 	else
 		pf &= ~System65::PFLAG_V;

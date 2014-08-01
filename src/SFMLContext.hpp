@@ -40,7 +40,7 @@ class SFMLContext
 		/** Draws the window contents */
 		void Flip(void);
 
-		sf::Window m_Window; //!< SFML window handle
+		sf::Window *m_Window; //!< SFML window handle
 	protected:
 	private:
 		static const char *m_szWindowTitle; //!< Title to use for the render window

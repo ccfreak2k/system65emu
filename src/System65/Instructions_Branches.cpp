@@ -32,7 +32,7 @@ void SYSTEM65CORE System65::Insn_BEQ(void)
 #if _DEBUG
 	ASSERT_INSN(0xf0);
 #endif // _DEBUG
-	Helper_SetBranch(pf & System65::PFLAG_Z);
+	Helper_SetBranch((pf & System65::PFLAG_Z)!=0);
 }
 
 void SYSTEM65CORE System65::Insn_BMI(void)
@@ -43,7 +43,7 @@ void SYSTEM65CORE System65::Insn_BMI(void)
 #if _DEBUG
 	ASSERT_INSN(0x30);
 #endif // _DEBUG
-	Helper_SetBranch(pf & System65::PFLAG_N);
+	Helper_SetBranch((pf & System65::PFLAG_N)!=0);
 }
 
 void SYSTEM65CORE System65::Insn_BNE(void)
@@ -87,5 +87,5 @@ void SYSTEM65CORE System65::Insn_BVS(void)
 #if _DEBUG
 	ASSERT_INSN(0x70);
 #endif // _DEBUG
-	Helper_SetBranch(pf & System65::PFLAG_V);
+	Helper_SetBranch((pf & System65::PFLAG_V)!=0);
 }

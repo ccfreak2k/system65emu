@@ -8,10 +8,10 @@
 	if (memory[addr] == 0) \
 		pf |= System65::PFLAG_Z; \
 	else {\
-			if (memory[addr] & 0b10000000) \
+			if (memory[addr] & 0x80) \
 				pf |= System65::PFLAG_C; \
 			memory[addr] *= 2; \
-			if (memory[addr] & 0b10000000) \
+			if (memory[addr] & 0x80) \
 				pf |= System65::PFLAG_N; \
 	} \
 	pc += isize
@@ -27,10 +27,10 @@ void SYSTEM65CORE System65::Insn_ASL(void)
 		if (a == 0)
 			pf |= System65::PFLAG_Z;
 		else {
-			if (a & 0b10000000)
+			if (a & 0x80)
 				pf |= System65::PFLAG_C;
 			a *= 2;
-			if (a & 0b10000000)
+			if (a & 0x80)
 				pf |= System65::PFLAG_N;
 		}
 		pc += 1;
@@ -56,10 +56,10 @@ void SYSTEM65CORE System65::Insn_ASL(void)
 		if (memory[addr] == 0) \
 			pf |= System65::PFLAG_Z; \
 		else { \
-			if (memory[addr] & 0b00000001) \
+			if (memory[addr] & 0x01) \
 				pf |= System65::PFLAG_C; \
 			memory[addr] /= 2;  \
-			if (memory[addr] & 0b10000000) \
+			if (memory[addr] & 0x80) \
 				pf |= System65::PFLAG_N; \
 		} \
 		pc += isize
@@ -75,10 +75,10 @@ void SYSTEM65CORE System65::Insn_LSR(void)
 		if (a == 0)
 			pf |= System65::PFLAG_Z;
 		else {
-			if (a & 0b00000001)
+			if (a & 0x01)
 				pf |= System65::PFLAG_C;
 			a /= 2;
-			if (a & 0b10000000)
+			if (a & 0x80)
 				pf |= System65::PFLAG_N;
 		}
 		pc += 1;
@@ -103,13 +103,13 @@ void SYSTEM65CORE System65::Insn_LSR(void)
 		if (memory[addr] == 0) \
 			pf |= System65::PFLAG_Z; \
 		else { \
-			carry = ((a & 0b10000000) ? 1 : 0); \
+			carry = ((a & 0x80) ? 1 : 0); \
 			memory[addr] = (memory[addr] << 1 | (pf & System65::PFLAG_C ? 1 : 0)); \
 			if (carry) \
 				pf |= System65::PFLAG_C; \
 			else \
 				pf &= ~System65::PFLAG_C; \
-			if (memory[addr] & 0b10000000) \
+			if (memory[addr] & 0x80) \
 				pf |= System65::PFLAG_N; \
 		} \
 		pc += isize
@@ -126,7 +126,7 @@ void SYSTEM65CORE System65::Insn_ROL(void)
 		if (a == 0)
 			pf |= System65::PFLAG_Z;
 		else {
-			carry = ((a & 0b10000000) ? 1 : 0);
+			carry = ((a & 0x80) ? 1 : 0);
 			a = (a << 1 | (pf & System65::PFLAG_C ? 1 : 0));
 
 			if (carry)
@@ -134,7 +134,7 @@ void SYSTEM65CORE System65::Insn_ROL(void)
 			else
 				pf &= ~System65::PFLAG_C;
 
-			if (a & 0b10000000)
+			if (a & 0x80)
 				pf |= System65::PFLAG_N;
 		}
 		pc += 1;
@@ -159,13 +159,13 @@ void SYSTEM65CORE System65::Insn_ROL(void)
 		if (memory[addr] == 0) \
 			pf |= System65::PFLAG_Z; \
 		else { \
-			carry = ((memory[addr] & 0b00000001) ? 1 : 0); \
+			carry = ((memory[addr] & 0x01) ? 1 : 0); \
 			memory[addr] = (memory[addr] >> 1 | (pf |= System65::PFLAG_C ? 1 : 0)); \
 			if (carry) \
 				pf |= System65::PFLAG_C; \
 			else \
 				pf &= ~System65::PFLAG_C; \
-			if (memory[addr] & 0b10000000) \
+			if (memory[addr] & 0x80) \
 				pf |= System65::PFLAG_N; \
 		} \
 		pc += isize
@@ -182,7 +182,7 @@ void SYSTEM65CORE System65::Insn_ROR(void)
 		if (a == 0)
 			pf |= System65::PFLAG_Z;
 		else {
-			carry = ((a & 0b00000001) ? 1 : 0);
+			carry = ((a & 0x01) ? 1 : 0);
 			a = (a >> 1 | (pf |= System65::PFLAG_C ? 1 : 0));
 
 			if (carry)
@@ -190,7 +190,7 @@ void SYSTEM65CORE System65::Insn_ROR(void)
 			else
 				pf &= ~System65::PFLAG_C;
 
-			if (a & 0b10000000)
+			if (a & 0x80)
 				pf |= System65::PFLAG_N;
 		}
 		pc += 1;

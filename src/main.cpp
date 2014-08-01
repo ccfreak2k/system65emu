@@ -1,10 +1,10 @@
 #include <main.hpp>
 
-//#if WIN32
-//INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT)
-//#else
+#if defined(_MSC_VER) && !defined(_DEBUG)
+INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT)
+#else
 int main (int argc, char **argv)
-//#endif // WIN32
+#endif //_MSC_VER && !_DEBUG
 {
 	extern char *optarg; // Used for getopt()
 	extern int optind;
@@ -13,6 +13,7 @@ int main (int argc, char **argv)
 	System65 sys;
 
 	// TODO: Make file loading more C++-ey
+#ifndef _MSC_VER
 	int c;
 	FILE *progfile = NULL;
 	while ((c = getopt(argc,argv,"b:s:i:h")) != -1) {
@@ -47,14 +48,38 @@ int main (int argc, char **argv)
 			exit(1);
 		}
 	}
+#else //_MSC_VER
+	// TODO: implement arbitrary file loading
+	FILE *progfile = NULL;
+	progfile = fopen("adctest.bin","rb");
+	if (progfile != NULL) {
+		printf("Loading file adctest.bin\n");
+		sys.LoadProgram(progfile);
+		fclose(progfile);
+	} else {
+		printf("Could not open adctest.bin\n");
+		exit(1);
+	}
+#endif //_MSC_VER
 
 	// Make a render window
-	sf::RenderWindow window(sf::VideoMode(896,464), "System65 Emulator", sf::Style::Close);
+	// should be 896x348
+	sf::RenderWindow window(sf::VideoMode(TEXCHAR_WIDTH*EMUSCREEN_WIDTH,TEXCHAR_HEIGHT*EMUSCREEN_HEIGHT), "System65 Emulator", sf::Style::Close);
 	window.setFramerateLimit(60);
 
 	// Load the font
 	sf::Texture fonttex;
-	if (!fonttex.loadFromFile("font_82.png"))
+#ifdef _DEBUG
+	printf("Max texture size: %i\n",fonttex.getMaximumSize());
+#endif // _DEBUG
+	// This will probably never happen, but let's handle it anyway.
+	if (fonttex.getMaximumSize() < 256) {
+		printf("Error: Your hardware does not support 256x256 textures.\n");
+		MessageBox(NULL, L"Your hardware does not support 256x256 textures. This emulator cannot run.", L"Error", (MB_OK|MB_ICONERROR));
+		exit(1);
+	}
+
+	if (!fonttex.loadFromFile("font_82.bmp"))
 		return 1;
 
 	// Literally an array of characters
@@ -63,8 +88,8 @@ int main (int argc, char **argv)
 	for (int x = 0; x < EMUSCREEN_WIDTH; x++) {
 		for (int y = 0; y < EMUSCREEN_HEIGHT; y++) {
 			screenbuf[x][y].setTexture(fonttex);
-			screenbuf[x][y].setTextureRect(sf::IntRect(0,0,8,16)); // left, top, width, height
-			screenbuf[x][y].setPosition(sf::Vector2f((x*TEXCHAR_WIDTH),(y*TEXCHAR_HEIGHT)));
+			screenbuf[x][y].setTextureRect(sf::IntRect(0,0,TEXCHAR_WIDTH,TEXCHAR_HEIGHT)); // left, top, width, height
+			screenbuf[x][y].setPosition(sf::Vector2f(((float)x*TEXCHAR_WIDTH),((float)y*TEXCHAR_HEIGHT)));
 		}
 	}
 
@@ -115,6 +140,7 @@ void DrawScreenFrame(sf::Sprite screenbuf[EMUSCREEN_WIDTH][EMUSCREEN_HEIGHT])
 
 	// Draw the outermost borders
 	for (int i = 1; i < EMUSCREEN_WIDTH-1; i++) { // Top/Bottom
+		// should be 0xc4?
 		DrawChar(screenbuf,(char)0xcd,i,0);
 		DrawChar(screenbuf,(char)0xcd,i,EMUSCREEN_HEIGHT-1);
 	}
@@ -150,6 +176,10 @@ void DrawLabels(sf::Sprite screenbuf[EMUSCREEN_WIDTH][EMUSCREEN_HEIGHT])
 
 void DrawStats(sf::Sprite screenbuf[EMUSCREEN_WIDTH][EMUSCREEN_HEIGHT], System65 *sys)
 {
+	// "But ccfreak2k," you say, "sprintf() is unsafe!"
+	// "You are correct," I give in reply, "but witness that our data is neatly
+	// "formed and easily constrained. An attacker must already be able to write
+	// "to our memory in order to write to our memory with this!"
 	char str[9] = {};
 	sprintf(str,"%.2X",sys->GetRegister_A());
 	DrawString(screenbuf,str,95,1);
@@ -163,7 +193,7 @@ void DrawStats(sf::Sprite screenbuf[EMUSCREEN_WIDTH][EMUSCREEN_HEIGHT], System65
 	DrawString(screenbuf,str,106,1);
 	uint8_t f = sys->GetRegister_P();
 	char *p = str;
-//	for (int i = 0b00000001; i < 256; i <<= 1)
+//	for (int i = 0x01; i < 256; i <<= 1)
 //		strcat(str,((f & i) == i) ? "1" : "0");
 	for (int i = 0x80; i > 0; i >>= 1)
 		*p++ = (f & i) ? '1' : '0';
@@ -184,22 +214,22 @@ void DrawString(sf::Sprite screenbuf[EMUSCREEN_WIDTH][EMUSCREEN_HEIGHT], const c
 void DrawChar(sf::Sprite screenbuf[EMUSCREEN_WIDTH][EMUSCREEN_HEIGHT], char c, unsigned int x, unsigned int y)
 {
 	// TODO: Use a better algo to find the tex coords
-	// Currently: character val is multiplied by 8 to get the X coordinate of a
-	// single-row texture. We successively subtract the actual row size until
-	// X is lower, and add a column to Y each time. Once X is lower than 128, we
-	// should have the proper coordinates.
+	// Currently: character val is multiplied by cell width to get the X
+	// coordinate of a single-row texture. We successively subtract the actual
+	// row size until X is lower, and add a column to Y each time. Once X is
+	// lower than 128, we should have the proper coordinates.
 	unsigned int xpos, ypos = 0;
 	unsigned char cr = (unsigned char)c;
-	xpos = (unsigned)cr*8;
+	xpos = (unsigned)cr*TEXCHAR_WIDTH;
 	//printf("[DEBUG] c = %c (%u), xpos = %u, final = ",c,(unsigned)c,xpos);
-	if (xpos > 127) {
-		while (xpos > 127) {
-			xpos -= 128;
-			ypos += 16;
+	if (xpos > ((TEXCHAR_WIDTH*16)-1)) {
+		while (xpos > ((TEXCHAR_WIDTH*16)-1)) {
+			xpos -= TEXCHAR_WIDTH*16;
+			ypos += TEXCHAR_HEIGHT;
 		}
 	}
-	//printf("%u,%u (%u,%u)\n",xpos,ypos,xpos/8,ypos/16);
-	screenbuf[x][y].setTextureRect(sf::IntRect(xpos,ypos,8,16));
+	//printf("%u,%u (%u,%u), c %c\n",xpos,ypos,xpos/TEXCHAR_WIDTH,ypos/TEXCHAR_HEIGHT,c);
+	screenbuf[x][y].setTextureRect(sf::IntRect(xpos,ypos,TEXCHAR_WIDTH,TEXCHAR_HEIGHT));
 }
 
 void ShowHelp(void)
