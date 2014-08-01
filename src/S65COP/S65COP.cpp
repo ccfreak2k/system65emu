@@ -5,7 +5,8 @@ S65COP::S65COP(uint8_t *base) :
 	vy(),
 	ix(0),
 	iy(0),
-	scratch(new uint8_t[0x80]),
+	ip(0),
+	scratch(new uint8_t[COP_SCRATCH_SIZE]),
 	cmdbuf(base),
 	cmdptr(0)
 {
@@ -20,7 +21,7 @@ S65COP::~S65COP()
 void S65COP::Tick(void)
 {
 	// pre-exec
-	if (cmdbus[ADDR_EXECUTE] == 0x00)
+	if (cmdbus[COP_ADDR_EXECUTE] == 0x00)
 		return;
 
 	// post-exec

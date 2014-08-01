@@ -7,12 +7,73 @@
 
 /** Address from which the "run" command is read/written
  *
- * Setting this to !0x00 tells the coprocessor to being executing the commands
- * in the command buffer. When the coprocessor reaches the end, it will set this
- * value to 0x00. If the value is set by the CPU to 0x00 during COP execution,
- * the execution will stop before the next instruction is run.
+ * Setting this to any value other than 0x00 tells the coprocessor to being
+ * executing the commands in the command buffer. When the coprocessor reaches
+ * the end of execution, it will set this value to 0x00. If the value is set by
+ * the CPU to 0x00 during COP execution, the execution will stop before the next
+ * instruction is run; however, the currently executing instruction will
+ * continue.
  */
-#define ADDR_EXECUTE 0xF0
+#define COP_ADDR_EXECUTE 0xF0
+
+/** Size of internal scratch memory, in bytes.
+ *
+ * As of this writing (2014-07-31) the size is 128 bytes (0x80).
+ */
+#define COP_SCRATCH_SIZE 0x80
+
+/** @defgroup insnlist Instruction Listing
+ * This is the listing of instructions currently supported for the System65
+ * coprocessor module.
+ *
+ * Instructions may be grouped by their rough function. Currently:
+ * * 0x00 are miscellaneous/status functions
+ * * 0x10 perform loads from memory
+ * * 0x20 perform stores to memory
+ * * 0x30 are the four basic arithmetic operations
+ * * 0x40 are the vector operations
+ * @{
+ */
+
+typedef enum {
+	/* Miscellanous/status/system */
+	STP = 0x00, //!< Halts execution. IP is reset to 0.
+	PSE = 0x01, //!< Halts execution. IP is not reset to 0.
+	NOP = 0x02, //!< Does nothing for 1 tick.
+	/* Loads */
+	LIX = 0x10, //!< Loads an integer into IX.
+	LIY = 0x11, //!< Loads an integer into IY.
+	LIS = 0x12, //!< Loads an integer into scratch space.
+	LVX = 0x18, //!< Loads a vector into VX.
+	LVY = 0x19, //!< Loads a vector into VY.
+	LVS = 0x1A, //!< Loads a vector into scratch space.
+	/* Stores */
+	SIX = 0x20, //!< Stores IX into the output buffer.
+	SIY = 0x21, //!< Stores IY into the output buffer.
+	SIS = 0x22, //!< Stores an integer from scratch space into the output buffer.
+	SVX = 0x28, //!< Stores VX into the output buffer.
+	SVY = 0x29, //!< Stores VY into the output buffer.
+	SVS = 0x2A, //!< Stores a vector from scratch space into the output buffer.
+	/* Basic math */
+	AII = 0x30, //!< Add IY to IX; the result is stored in IX.
+	AIV = 0x31, //!< Add IX to VX; the result is kept in VX.
+	AVV = 0x32, //!< Add VY to VX; the result is stored in VX.
+	SII = 0x34, //!< Subtract IY from IX; the result is stored in IX.
+	SIV = 0x35, //!< Subtract IX from VX; the result is kept in VX.
+	SVV = 0x36, //!< Subtract VY from VX; the result is stored in VX.
+	MII = 0x38, //!< Multiply IX by IY; the result is stored in IX.
+	MIV = 0x39, //!< Multiply VX by IX; the result is kept in VX.
+	MVV = 0x3A, //!< Multiply VX by VY; the result is stored in VX.
+	DII = 0x3C, //!< Divide IX by IY; the result is stored in IX.
+	DIV = 0x3D, //!< Divide VX by IX; the result is kept in VX.
+	DVV = 0x3E, //!< Divide VX by VY; the result is stored in VX.
+	/* Vector ops */
+	DOT = 0x40, //!< Dot product of VX and VY; the result is stored in VX.
+	CRS = 0x41, //!< Cross product of VX and VY; the result is stored in VX.
+	MID = 0x42, //!< The midpoint between VX and VY; the result is stored in VX.
+} Opcode;
+
+/** @} */
 
 /** \class S65COP
  * The System65 Coprocessor class.
@@ -50,28 +111,10 @@
  *
  * 0xF0-0xFF (8 bytes): Command and status registers
  *
- * \section insns Coprocessor Instructions
- * The System65 Coprocessor currently supports the following instructions:
- *
- * * LIX: Load an integer into IX
- * * LIY: Load an integer into IY
- * * LIS: Load an integer into scratch space
- * * LVX: Load a vector into VX
- * * LVY: Load a vector into VY
- * * LVS: Load a vector into scratch space
- * * SIX: Store IX into the output buffer
- * * SIY: Store IY into the output buffer
- * * SIS: Store an integer from scratch space into the output buffer
- * * SVX: Store VX into the output buffer
- * * SVY: Store VY into the output buffer
- * * SVS: Store a vector from scratch space into the output buffer
- * * AII/AIV/AVV: Add integers and vectors
- * * SII/SIV/SVV: Subtract integers and vectors
- * * MII/MIV/MVV: Multiply integers and vectors
- * * DII/DIV/DVV: Divide integers and vectors
- * * DOT: Dot product of two vectors
- * * CRS: Cross product of two vectors
- * * MID: Calculates the midpoint of two vectors
+ * Additionally, the coprocessor has 128 bytes of internal "scratch" memory.
+ * This can be used by code as temporary storage. The scratch space is divided
+ * into 32 "slots" of 4 bytes, or 32 bits, each, enough to hold a single vector
+ * value. Currently there is no way to pack values in the scratch space.
  *
  * \section futureideas Future Ideas
  *
@@ -82,6 +125,9 @@
  * instructions.
  * * Dispense with the scratch space and simply use main memory as the scratch
  * space. This would allow results to be dumped directly to RAM.
+ * * Execution control instructions, such as conditionals.
+ * * Instruction orthogonality; allowing each instruction to have several
+ * * different ways of accepting data, much like 6502 instructions.
  */
 
 class S65COP
@@ -89,7 +135,6 @@ class S65COP
 	public:
 		/** Initializes a coprocessor
 		 *
-		 * \param[in] membus Pointer to the system memory bus
 		 * \param[in] base Base address for the command buffer
 		 */
 		S65COP(uint8_t *base);
@@ -110,6 +155,7 @@ class S65COP
 		VectorRegister vy; //!< Second vector register
 		uint16_t ix; //!< First integer register
 		uint16_t iy; //!< Second integer register
+		uint16_t ip; //!< Instruction pointer \FIXME Check if we actually need this
 		uint8_t *scratch; //!< Internal RAM scratch space
 
 		uint8_t *cmdbuf; //!< Command buffer page in system memory
