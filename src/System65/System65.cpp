@@ -6,7 +6,7 @@
 
 System65::System65(unsigned int memsize) :
 	m_CycleCount(0),
-	m_StackBase(0x0100),
+	m_StackBase(STACK_BASE),
 	a(0x00),
 	x(0x00),
 	y(0x00),
@@ -53,6 +53,14 @@ void System65::LoadProgram(FILE *progfile, unsigned int offset)
 		return;
 
 	fread(&memory[offset],sizeof(uint8_t),(65536-offset),progfile);
+	m_mutMachine.unlock();
+}
+
+void System65::Reset(void)
+{
+	m_mutMachine.lock();
+	pc = CODE_BASE;
+	s = 0x00;
 	m_mutMachine.unlock();
 }
 

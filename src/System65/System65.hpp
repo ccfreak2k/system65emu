@@ -61,14 +61,17 @@
 
 /** \def FASTEMU When defined, functions will be inlined for speed. May increase code size heavily.
  *
- * \note Best to leave this disabled, as gcc can only inline from functions
- * within the same compilation unit.
+ * \note Best to leave this disabled for now, as gcc can only inline from
+ * functions within the same compilation unit.
  */
 #ifdef FASTEMU
 	#define SYSTEM65CORE inline
 #else
 	#define SYSTEM65CORE
 #endif
+
+#define STACK_BASE 0x0100 //!< Base address for the stack
+#define CODE_BASE 0x0200 //!< Base address for code
 
 /** Function macro to assert the correct decoding of an instruction */
 #define ASSERT_INSN(byte) assert(memory[pc] == byte)
@@ -246,6 +249,13 @@ class System65
 		 */
 		void LoadProgram(FILE *progfile, unsigned int offset = 0x200);
 
+		/** Performs a hot reset of the machine.
+		 *
+		 * PC and S are reset to their starting values; all other registers and
+		 * flags are left untouched.
+		 */
+		void Reset(void);
+
 		uint8_t *memory; //!< Pointer to system memory for this system
 		unsigned int memorysize; //!< Size of memory for this system.
 
@@ -335,7 +345,7 @@ class System65
 
 		/** \defgroup addressmodes  Memory addressing modes
 		 *
-		 * These functions translate input address data and mode and return the
+		 * These methods translate input address data and mode and return the
 		 * actual address to read/write. Each specific opcode that reads from or
 		 * writes to an address invokes one of these, but these functions read
 		 * directly from the machine state.
@@ -344,10 +354,10 @@ class System65
 		 * array as a \c uint8_t, which can be treated as an absolute pointer in
 		 * memory.
 		 *
-		 * \note Each function returns 16-bit addresses in big-endian (MSB
+		 * \note Each method returns 16-bit addresses in big-endian (MSB
 		 * first) to index the memory array correctly.
 		 *
-		 * \note Most function descriptions in this group taken from this web
+		 * \note Most method descriptions in this group taken from this web
 		 * page: http://www.obelisk.demon.co.uk/6502/addressing.html
 		 * @{
 		 */
@@ -379,7 +389,7 @@ class System65
 		 * address from the instruction and added the contents of the <tt>X</tt>
 		 * register. For example if <tt>X</tt> contains <tt>$92</tt> then an
 		 * <tt>STA $2000,X</tt> instruction will store the accumulator at
-		 * <tt>$2092</tt> (e.g. <tt>$2000</tt> + <tt>$92</tt>).
+		 * <tt>$2092</tt> (i.e. <tt>$2000</tt> + <tt>$92</tt>).
 		 */
 		uint16_t SYSTEM65CORE Addr_ABX(void); //!< Operand is a two-byte absolute address indexed with X
 
@@ -680,23 +690,23 @@ class System65
 		/** Flags affected:
 		 * * none
 		 */
-		void SYSTEM65CORE Insn_PHA(void); //!< Push A
+		void SYSTEM65CORE Insn_PHA(void); //!< Pushes A to the stack
 
 		/** Flags affected:
 		 * * none
 		 */
-		void SYSTEM65CORE Insn_PHP(void); //!< Push P
+		void SYSTEM65CORE Insn_PHP(void); //!< Pushes P to the stack
 
 		/** Flags affected:
 		 * * Z: Set if A == 0
 		 * * N: Set if MSB of A is set
 		 */
-		void SYSTEM65CORE Insn_PLA(void); //!< Pull A
+		void SYSTEM65CORE Insn_PLA(void); //!< Pops from the stack to A
 
 		/** Flags affected:
 		 * * All
 		 */
-		void SYSTEM65CORE Insn_PLP(void); //!< Pull P
+		void SYSTEM65CORE Insn_PLP(void); //!< Pops from the stack to P
 
 		// Logical Operations
 
