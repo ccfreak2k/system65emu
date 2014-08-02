@@ -25,6 +25,7 @@ void S65COP::Tick(void)
 		return;
 
 	// post-exec
-	if (cmdptr > 0x7F)
-		cmdptr = 0x00;
+	cmdptr++;
+	if (cmdptr > (COP_SCRATCH_SIZE-1))
+		cmdptr -= (COP_SCRATCH_SIZE-1);
 }

@@ -7,12 +7,12 @@
 
 /** Address from which the "run" command is read/written
  *
- * Setting this to any value other than 0x00 tells the coprocessor to being
+ * Setting this to any value other than 0x00 tells the coprocessor to begin
  * executing the commands in the command buffer. When the coprocessor reaches
  * the end of execution, it will set this value to 0x00. If the value is set by
  * the CPU to 0x00 during COP execution, the execution will stop before the next
  * instruction is run; however, the currently executing instruction will
- * continue.
+ * continue. If execution runs past 0x7F, execution continues at 0x00.
  */
 #define COP_ADDR_EXECUTE 0xF0
 
@@ -22,7 +22,7 @@
  */
 #define COP_SCRATCH_SIZE 0x80
 
-/** @defgroup insnlist Instruction Listing
+/** @defgroup copinsnlist Coprocessor Instruction Listing
  * This is the listing of instructions currently supported for the System65
  * coprocessor module.
  *
@@ -89,8 +89,8 @@ typedef enum {
 /** \page workingdesc Coprocessor Description
  *
  * \section arch Coprocessor Architecture
- * The System65 Coprocessor is a 16-bit math coprocessor with support for
- * multiplication and division as well as operation on three-dimensional
+ * The System65 Coprocessor is a 16-bit integer math coprocessor with support
+ * for multiplication and division as well as operation on three-dimensional
  * vectors. It has the following features:
  *
  * * Two 16-bit integer registers: IX and IY
@@ -127,7 +127,8 @@ typedef enum {
  * space. This would allow results to be dumped directly to RAM.
  * * Execution control instructions, such as conditionals.
  * * Instruction orthogonality; allowing each instruction to have several
- * * different ways of accepting data, much like 6502 instructions.
+ * different ways of accepting data, much like 6502 instructions.
+ * * Add a way to modify individual elements within each vector register.
  */
 
 class S65COP
@@ -138,14 +139,24 @@ class S65COP
 		 * \param[in] base Base address for the command buffer
 		 */
 		S65COP(uint8_t *base);
+
 		/** Uninitializes this coprocessor */
 		~S65COP();
 
-		/** Run one tick of the coprocessor. A tick may comprise more than one cycle. */
+		/** Run one tick of the coprocessor.
+		 *
+		 * If the COP encounters a stop (STP) or pause (PSE) instruction, this
+		 * method will return immediately.
+		 *
+		 * A tick may comprise more than one cycle.
+		 */
 		void Tick(void);
 	protected:
 	private:
-		/** Vector register typedef */
+		/** Struct representing a vector register
+		 *
+		 * Each vector register contains three components of 16 bits each.
+		 */
 		typedef struct VectorRegister {
 			uint16_t x; //!< X/1st component
 			uint16_t y; //!< Y/2nd component
@@ -155,7 +166,7 @@ class S65COP
 		VectorRegister vy; //!< Second vector register
 		uint16_t ix; //!< First integer register
 		uint16_t iy; //!< Second integer register
-		uint16_t ip; //!< Instruction pointer \FIXME Check if we actually need this
+		uint16_t ip; //!< Instruction pointer
 		uint8_t *scratch; //!< Internal RAM scratch space
 
 		uint8_t *cmdbuf; //!< Command buffer page in system memory
