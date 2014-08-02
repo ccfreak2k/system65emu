@@ -213,21 +213,9 @@ void DrawString(sf::Sprite screenbuf[EMUSCREEN_WIDTH][EMUSCREEN_HEIGHT], const c
 
 void DrawChar(sf::Sprite screenbuf[EMUSCREEN_WIDTH][EMUSCREEN_HEIGHT], char c, unsigned int x, unsigned int y)
 {
-	// TODO: Use a better algo to find the tex coords
-	// Currently: character val is multiplied by cell width to get the X
-	// coordinate of a single-row texture. We successively subtract the actual
-	// row size until X is lower, and add a column to Y each time. Once X is
-	// lower than 128, we should have the proper coordinates.
-	unsigned int xpos, ypos = 0;
-	unsigned char cr = (unsigned char)c;
-	xpos = (unsigned)cr*TEXCHAR_WIDTH;
-	//printf("[DEBUG] c = %c (%u), xpos = %u, final = ",c,(unsigned)c,xpos);
-	if (xpos > ((TEXCHAR_WIDTH*16)-1)) {
-		while (xpos > ((TEXCHAR_WIDTH*16)-1)) {
-			xpos -= TEXCHAR_WIDTH*16;
-			ypos += TEXCHAR_HEIGHT;
-		}
-	}
+	unsigned char uc = (unsigned char)c;
+	unsigned xpos = (uc % TEXCHAR_CELLS) * TEXCHAR_WIDTH;
+	unsigned ypos = (uc / TEXCHAR_CELLS) * TEXCHAR_HEIGHT;
 	//printf("%u,%u (%u,%u), c %c\n",xpos,ypos,xpos/TEXCHAR_WIDTH,ypos/TEXCHAR_HEIGHT,c);
 	screenbuf[x][y].setTextureRect(sf::IntRect(xpos,ypos,TEXCHAR_WIDTH,TEXCHAR_HEIGHT));
 }
