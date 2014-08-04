@@ -10,9 +10,9 @@ System65::System65(unsigned int memsize) :
 	a(0x00),
 	x(0x00),
 	y(0x00),
-	pf(System65::PFLAG_R),
-	s(0x00),
-	pc(0x0200)
+	pf(System65::PFLAG_R|System65::PFLAG_I),
+	s(0xFD),
+	pc(CODE_BASE)
 {
 	// Basic bounds checking
 	if (memsize > 0x10000)
@@ -42,6 +42,9 @@ void System65::LoadProgram(void *progmem, unsigned int progsize, unsigned int of
 		return;
 
 	memcpy(&memory[offset],(uint8_t*)progmem,(size_t)((65536-offset) < progsize ? (65536-offset) : progsize));
+
+	Reset();
+	pc = CODE_BASE;
 }
 
 void System65::LoadProgram(FILE *progfile, unsigned int offset)
@@ -50,12 +53,17 @@ void System65::LoadProgram(FILE *progfile, unsigned int offset)
 		return;
 
 	fread(&memory[offset],sizeof(uint8_t),(65536-offset),progfile);
+
+	Reset();
+	pc = CODE_BASE;
 }
 
 void System65::Reset(void)
 {
-	pc = CODE_BASE;
-	s = 0x00;
+	Helper_SetFlag(System65::PFLAG_I);
+	Helper_ClearFlag(System65::PFLAG_D);
+	pc = Helper_PeekWord(0xFFFC);
+	s = 0xFD;
 }
 
 void System65::Tick(void)
