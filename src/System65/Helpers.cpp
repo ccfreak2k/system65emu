@@ -19,8 +19,8 @@ void SYSTEM65CORE System65::Helper_Set_ZN_Flags(uint8_t reg)
 
 void SYSTEM65CORE System65::Helper_PushByte(uint8_t val)
 {
-	s--;
 	memory[m_StackBase+s] = val;
+	s--;
 }
 
 void SYSTEM65CORE System65::Helper_PushWord(uint16_t val)
@@ -31,8 +31,8 @@ void SYSTEM65CORE System65::Helper_PushWord(uint16_t val)
 
 uint8_t SYSTEM65CORE System65::Helper_PopByte(void)
 {
-	uint8_t val = memory[m_StackBase+s];
 	s++;
+	uint8_t val = memory[m_StackBase+s];
 	return val;
 }
 
