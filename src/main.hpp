@@ -8,12 +8,18 @@
 		#define _CRT_SECURE_NO_WARNINGS
 	#endif
 	#include <windows.h>
-	#ifdef __MINGW__
+	#ifdef __MINGW32__
 		#include <unistd.h>
 	#else // probably msvc
 		#include <stdint.h>
 	#endif
+#else
+	#include <unistd.h>
 #endif // WIN32
+
+#include <atomic>
+#include <thread>
+#include <mutex>
 
 #ifdef __cplusplus
     #include <cstdlib>
@@ -120,13 +126,19 @@
 // The font file should be a texture atlas with 16x16 cells. Each cell should
 // have an 8x12 character in it. The atlas texture size should thus be 128x192
 
-#define TEXCHAR_WIDTH 8 // w/h of a character
-#define TEXCHAR_HEIGHT 12
-#define TEXCHAR_CELLS 16 // Number of cells on the sheet
-#define SCREEN_WIDTH 80 // Monitor size, in characters
-#define SCREEN_HEIGHT 25
-#define EMUSCREEN_WIDTH 112 // Emulator total size, also in characters
-#define EMUSCREEN_HEIGHT 29
+#define TEXCHAR_WIDTH 8 //!< Width of a single glyph on the texture sheet
+#define TEXCHAR_HEIGHT 12 //!< Height of a single glyph on the texture sheet
+#define TEXCHAR_CELLS 16 //!< Number of cells in either direction on the texture sheet
+#define SCREEN_WIDTH 80 //!< Monitor width, in characters/columns
+#define SCREEN_HEIGHT 25 //!< Monitor height, in characters/rows
+#define EMUSCREEN_WIDTH 112 //!< Width of the entire emulator screen, in characters/columns
+#define EMUSCREEN_HEIGHT 29 //!< Height of the entire emulator screen, in characters/rows
+
+System65 sys; //!< Object for the VM itself
+
+std::atomic<bool> bStopExec = false; //!< Whether the VM should stop running; the thread will terminate
+
+std::mutex mutMachineState; //!< Lock for the entire VM state
 
 /** \fn int main(int argc, char **argv)
  * Main function for the emulator. This function initializes SDL and prepares
@@ -139,6 +151,15 @@
 //#ifndef WIN32
 int main (int argc, char **argv);
 //#endif // WIN32
+
+/** Main thread for the System65 VM.
+ *
+ * This function manages the System65 execution state. It runs in a separate
+ * thread and communicates with the main thread. The VM will run as long as
+ * \ref mutMachineState is unlocked; if it is locked, the VM is stopped, and
+ * this thread awaits commands.
+ */
+void SystemExec(void);
 
 /** Draws the emulator screen frame.
  *

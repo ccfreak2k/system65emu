@@ -9,8 +9,11 @@ int main (int argc, char **argv)
 	extern char *optarg; // Used for getopt()
 	extern int optind;
 
-	// Make a System65 instance
-	System65 sys;
+	// Acquire the lock to keep the VM from running off
+	mutMachineState.lock();
+
+	// Make a thread for the system
+	std::thread SystemThread(SystemExec);
 
 	// TODO: Make file loading more C++-ey
 #ifndef _MSC_VER
@@ -75,7 +78,9 @@ int main (int argc, char **argv)
 	// This will probably never happen, but let's handle it anyway.
 	if (fonttex.getMaximumSize() < 256) {
 		printf("Error: Your hardware does not support 256x256 textures.\n");
+#ifdef WIN32
 		MessageBox(NULL, L"Your hardware does not support 256x256 textures. This emulator cannot run.", L"Error", (MB_OK|MB_ICONERROR));
+#endif // WIN32
 		exit(1);
 	}
 
@@ -102,12 +107,14 @@ int main (int argc, char **argv)
 	// Initial draw of the processor status
 	DrawStats(screenbuf,&sys);
 
+	window.setVerticalSyncEnabled(true);
+
+	// Unlock the VM to let it run
+	mutMachineState.unlock();
+
 	// Main loop
 	while(window.isOpen()) {
 		sf::Event event;
-
-		// Step vm execution
-		sys.Tick();
 
 		while (window.pollEvent(event)) {
 			if (event.type == sf::Event::Closed) {
@@ -118,7 +125,9 @@ int main (int argc, char **argv)
 
 		// Draw the window buffer
 		window.clear(sf::Color::Black);
+		mutMachineState.lock();
 		DrawStats(screenbuf,&sys); // Update the onscreen CPU state
+		mutMachineState.unlock();
 		for (int x = 0; x < EMUSCREEN_WIDTH; x++) {
 			for (int y = 0; y < EMUSCREEN_HEIGHT; y++)
 					window.draw(screenbuf[x][y]);
@@ -127,7 +136,21 @@ int main (int argc, char **argv)
 	}
 
 	printf("Finished\n");
-	return 0;
+	bStopExec = true;
+	SystemThread.join();
+	exit(0);
+}
+
+void SystemExec(void) {
+	for (;;) {
+		if (bStopExec)
+			return;
+
+		if (mutMachineState.try_lock()) {
+			sys.Tick();
+			mutMachineState.unlock();
+		}
+	}
 }
 
 void DrawScreenFrame(sf::Sprite screenbuf[EMUSCREEN_WIDTH][EMUSCREEN_HEIGHT])
