@@ -5,7 +5,7 @@
 void SYSTEM65CORE System65::Insn_BRK(void)
 {
 #ifdef DEBUG_PRINT_INSTRUCTION
-	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
 #if _DEBUG
 	ASSERT_INSN(0x00);
@@ -21,7 +21,7 @@ void SYSTEM65CORE System65::Insn_BRK(void)
 void SYSTEM65CORE System65::Insn_NOP(void)
 {
 #ifdef DEBUG_PRINT_INSTRUCTION
-	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
 #if _DEBUG
 	ASSERT_INSN(0xea);
@@ -33,7 +33,7 @@ void SYSTEM65CORE System65::Insn_NOP(void)
 void SYSTEM65CORE System65::Insn_RTI(void)
 {
 #ifdef DEBUG_PRINT_INSTRUCTION
-	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
 #if _DEBUG
 	ASSERT_INSN(0x40);

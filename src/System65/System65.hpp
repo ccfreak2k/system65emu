@@ -103,6 +103,14 @@
 #define INSN_DECODE_ERROR() \
 	printf("ERROR: %s called with opcode 0x%.2X\n", __FUNCTION__, memory[pc])
 
+/** \def PRINT_INSTRUCTION Prints the currently executing instruction */
+#if defined(_MSC_VER) && !defined(__MINGW32__)
+#define PRINT_INSTRUCTION() \
+	printf("[DEBUG] %s, pc = 0x%.4X\n", __FUNCSIG__, pc)
+#else
+	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc)
+#endif // defined(_MSC_VER) && !defined(__MINGW32__)
+
 class System65
 {
 	public:

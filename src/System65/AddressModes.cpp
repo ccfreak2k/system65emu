@@ -15,9 +15,8 @@ uint8_t SYSTEM65CORE System65::Addr_ACC(void){ assert(false); return 0; }
 // Absolute
 uint16_t SYSTEM65CORE System65::Addr_ABS(void)
 {
-	// FIXME: make sure types match and don't corrupt the retval
-	// Further, the 6502 is little-endian so make sure the value is retrieved
-	// correctly.
+	// FIXME: JMP doesn't use this as a pointer (see insn 0x4c); make sure
+	// other callers are using it correctly as well.
 	return (uint16_t)((uint16_t)(memory[pc+2] << 8) + (uint16_t)memory[pc+1]);
 }
 

@@ -39,7 +39,7 @@ void SYSTEM65CORE System65::Insn_AND(void)
 void SYSTEM65CORE System65::Insn_EOR(void)
 {
 #ifdef DEBUG_PRINT_INSTRUCTION
-	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
 	switch(memory[pc]) {
 	case 0x49: // immediate
@@ -72,7 +72,7 @@ void SYSTEM65CORE System65::Insn_EOR(void)
 void SYSTEM65CORE System65::Insn_ORA(void)
 {
 #ifdef DEBUG_PRINT_INSTRUCTION
-	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
 	switch(memory[pc]) {
 	case 0x09: // immediate
@@ -100,7 +100,7 @@ void SYSTEM65CORE System65::Insn_ORA(void)
 void SYSTEM65CORE System65::Insn_BIT(void)
 {
 #ifdef DEBUG_PRINT_INSTRUCTION
-	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
 	uint8_t val;
 	switch (memory[pc]) {

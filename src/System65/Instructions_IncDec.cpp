@@ -9,7 +9,7 @@
 void SYSTEM65CORE System65::Insn_INC(void)
 {
 #ifdef DEBUG_PRINT_INSTRUCTION
-	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
 	uint16_t addr;
 	switch(memory[pc]) {
@@ -37,7 +37,7 @@ void SYSTEM65CORE System65::Insn_INC(void)
 void SYSTEM65CORE System65::Insn_INX(void)
 {
 #ifdef DEBUG_PRINT_INSTRUCTION
-	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
 #if _DEBUG
 	ASSERT_INSN(0xe8);
@@ -61,7 +61,7 @@ void SYSTEM65CORE System65::Insn_INY(void)
 void SYSTEM65CORE System65::Insn_DEC(void)
 {
 #ifdef DEBUG_PRINT_INSTRUCTION
-	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
 	uint16_t addr;
 	switch(memory[pc]) {
@@ -90,7 +90,7 @@ void SYSTEM65CORE System65::Insn_DEC(void)
 void SYSTEM65CORE System65::Insn_DEX(void)
 {
 #ifdef DEBUG_PRINT_INSTRUCTION
-	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
 #if _DEBUG
 	ASSERT_INSN(0xca);
@@ -103,7 +103,7 @@ void SYSTEM65CORE System65::Insn_DEX(void)
 void SYSTEM65CORE System65::Insn_DEY(void)
 {
 #ifdef DEBUG_PRINT_INSTRUCTION
-	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
 #if _DEBUG
 	ASSERT_INSN(0x88);

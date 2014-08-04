@@ -9,7 +9,7 @@
 void SYSTEM65CORE System65::Insn_ADC(void)
 {
 #ifdef DEBUG_PRINT_INSTRUCTION
-	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
 	// Status: coding complete, needs testing
 	int16_t val,nval;
@@ -86,7 +86,7 @@ void SYSTEM65CORE System65::Insn_ADC(void)
 void SYSTEM65CORE System65::Insn_SBC(void)
 {
 #ifdef DEBUG_PRINT_INSTRUCTION
-	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
 	// TODO: BCD mode subtract
 	uint16_t val,nval;
@@ -141,7 +141,7 @@ void SYSTEM65CORE System65::Insn_SBC(void)
 void SYSTEM65CORE System65::Insn_CMP(void)
 {
 #ifdef DEBUG_PRINT_INSTRUCTION
-	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
 	int8_t val;
 	switch (memory[pc]) {
@@ -178,7 +178,7 @@ void SYSTEM65CORE System65::Insn_CMP(void)
 void SYSTEM65CORE System65::Insn_CPX(void)
 {
 #ifdef DEBUG_PRINT_INSTRUCTION
-	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
 	uint8_t val;
 	switch(memory[pc]) {
@@ -205,7 +205,7 @@ void SYSTEM65CORE System65::Insn_CPX(void)
 void SYSTEM65CORE System65::Insn_CPY(void)
 {
 #ifdef DEBUG_PRINT_INSTRUCTION
-	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
 	uint8_t val;
 	switch(memory[pc]) {

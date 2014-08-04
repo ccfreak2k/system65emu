@@ -6,12 +6,12 @@
 void SYSTEM65CORE System65::Insn_JMP(void)
 {
 #ifdef DEBUG_PRINT_INSTRUCTION
-	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
 	switch (memory[pc]) {
 	case 0x4c: // absolute
 		m_CycleCount += 3;
-		pc = memory[Addr_ABS()];
+		pc = Addr_ABS();
 		break;
 	case 0x6c: // indirect
 		m_CycleCount += 5;
@@ -25,7 +25,7 @@ void SYSTEM65CORE System65::Insn_JMP(void)
 void SYSTEM65CORE System65::Insn_JSR(void)
 {
 #ifdef DEBUG_PRINT_INSTRUCTION
-	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
 #if _DEBUG
 	ASSERT_INSN(0x20);
@@ -41,7 +41,7 @@ void SYSTEM65CORE System65::Insn_JSR(void)
 void SYSTEM65CORE System65::Insn_RTS(void)
 {
 #ifdef DEBUG_PRINT_INSTRUCTION
-	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc);
+	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
 #if _DEBUG
 	ASSERT_INSN(0x60);
