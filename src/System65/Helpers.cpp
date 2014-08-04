@@ -8,9 +8,13 @@ void SYSTEM65CORE System65::Helper_Set_ZN_Flags(uint8_t reg)
 {
 	if (reg == 0)
 		pf |= System65::PFLAG_Z;
+	else
+		pf &= ~(System65::PFLAG_Z);
 
 	if (reg & 0x80)
 		pf |= System65::PFLAG_N;
+	else
+		pf &= ~(System65::PFLAG_N);
 }
 
 void SYSTEM65CORE System65::Helper_PushByte(uint8_t val)
