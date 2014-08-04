@@ -54,13 +54,14 @@ int main (int argc, char **argv)
 #else //_MSC_VER
 	// TODO: implement arbitrary file loading
 	FILE *progfile = NULL;
-	progfile = fopen("adctest.bin","rb");
+	char *filename = "6502_functional_test.bin";
+	progfile = fopen(filename,"rb");
 	if (progfile != NULL) {
-		printf("Loading file adctest.bin\n");
+		printf("Loading file %s...\n",filename);
 		sys.LoadProgram(progfile);
 		fclose(progfile);
 	} else {
-		printf("Could not open adctest.bin\n");
+		printf("Could not open %s\n",filename);
 		exit(1);
 	}
 #endif //_MSC_VER
