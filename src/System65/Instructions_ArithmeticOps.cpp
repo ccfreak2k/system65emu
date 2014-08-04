@@ -148,19 +148,19 @@ void SYSTEM65CORE System65::Insn_CMP(void)
 	case 0xc9: // immediate
 		LOCAL_LOADVAL(2,2,Addr_IMM()); break;
 	case 0xc5: // zeropage
-		LOCAL_LOADVAL(2,3,Addr_IMM()); break;
+		LOCAL_LOADVAL(2,3,Addr_ZPG()); break;
 	case 0xd5: // zeropage,x
-		LOCAL_LOADVAL(2,4,Addr_IMM()); break;
+		LOCAL_LOADVAL(2,4,Addr_ZPX()); break;
 	case 0xcd: // absolute
-		LOCAL_LOADVAL(3,4,Addr_IMM()); break;
+		LOCAL_LOADVAL(3,4,Addr_ABS()); break;
 	case 0xdd: // absolute,x
-		LOCAL_LOADVAL(3,4,Addr_IMM()); break;
+		LOCAL_LOADVAL(3,4,Addr_ABX()); break;
 	case 0xd9: // absolute,y
-		LOCAL_LOADVAL(3,4,Addr_IMM()); break;
+		LOCAL_LOADVAL(3,4,Addr_ABY()); break;
 	case 0xc1: // (indirect,x)
-		LOCAL_LOADVAL(2,6,Addr_IMM()); break;
+		LOCAL_LOADVAL(2,6,Addr_INX()); break;
 	case 0xd1: // (indirect),y
-		LOCAL_LOADVAL(2,5,Addr_IMM()); break;
+		LOCAL_LOADVAL(2,5,Addr_INY()); break;
 	default:
 		INSN_DECODE_ERROR(); return;
 	}
