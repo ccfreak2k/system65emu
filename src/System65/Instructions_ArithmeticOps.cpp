@@ -183,7 +183,7 @@ void SYSTEM65CORE System65::Insn_CPX(void)
 	uint8_t val;
 	switch(memory[pc]) {
 	case 0xe0: // immediate
-		LOCAL_LOADVAL(2,2,Addr_ABS()); break;
+		LOCAL_LOADVAL(2,2,Addr_IMM()); break;
 	case 0xe4: // zeropage
 		LOCAL_LOADVAL(2,3,Addr_ZPG()); break;
 	case 0xec: // absolute
@@ -194,12 +194,18 @@ void SYSTEM65CORE System65::Insn_CPX(void)
 
 	if (x >= val) // carry
 		pf |= System65::PFLAG_C;
+	else
+		pf &= ~(System65::PFLAG_C);
 
 	if (x == val) // zero
 		pf |= System65::PFLAG_Z;
+	else
+		pf &= ~(System65::PFLAG_Z);
 
 	if ((x - val) < 0) // negative
 		pf |= System65::PFLAG_N;
+	else
+		pf &= ~(System65::PFLAG_N);
 }
 
 void SYSTEM65CORE System65::Insn_CPY(void)
@@ -221,11 +227,17 @@ void SYSTEM65CORE System65::Insn_CPY(void)
 
 	if (y >= val) // carry
 		pf |= System65::PFLAG_C;
+	else
+		pf &= ~(System65::PFLAG_C);
 
 	if (y == val) // zero
 		pf |= System65::PFLAG_Z;
+	else
+		pf &= ~(System65::PFLAG_Z);
 
 	if ((y - val) < 0) // negative
 		pf |= System65::PFLAG_N;
+	else
+		pf &= ~(System65::PFLAG_N);
 }
 #undef LOCAL_LOADVAL
