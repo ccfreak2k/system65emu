@@ -36,32 +36,26 @@ System65::~System65()
 
 void System65::LoadProgram(void *progmem, unsigned int progsize, unsigned int offset)
 {
-	m_mutMachine.lock();
 	if (progmem == NULL)
 		return;
 	if (progsize == 0)
 		return;
 
 	memcpy(&memory[offset],(uint8_t*)progmem,(size_t)((65536-offset) < progsize ? (65536-offset) : progsize));
-	m_mutMachine.unlock();
 }
 
 void System65::LoadProgram(FILE *progfile, unsigned int offset)
 {
-	m_mutMachine.lock();
 	if (progfile == NULL)
 		return;
 
 	fread(&memory[offset],sizeof(uint8_t),(65536-offset),progfile);
-	m_mutMachine.unlock();
 }
 
 void System65::Reset(void)
 {
-	m_mutMachine.lock();
 	pc = CODE_BASE;
 	s = 0x00;
-	m_mutMachine.unlock();
 }
 
 void System65::Tick(void)
@@ -80,44 +74,14 @@ void System65::Tick(unsigned int cycleLimit)
 	m_CycleCount -= cycleLimit;
 }
 
-uint8_t System65::GetRegister_A(void)
-{
-	ATOMIC_RETURN_8(a);
-}
-
-uint8_t System65::GetRegister_X(void)
-{
-	ATOMIC_RETURN_8(x);
-}
-
-uint8_t System65::GetRegister_Y(void)
-{
-	ATOMIC_RETURN_8(y);
-}
-
-uint8_t System65::GetRegister_P(void)
-{
-	ATOMIC_RETURN_8(pf);
-}
-
-uint8_t System65::GetRegister_S(void)
-{
-	ATOMIC_RETURN_8(s);
-}
-
-uint16_t System65::GetRegister_PC(void)
-{
-	ATOMIC_RETURN_16(pc);
-}
-
 void System65::SetStackBasePage(uint8_t base)
 {
-	ATOMIC_SET(m_StackBase,((uint16_t)base << 8));
+	m_StackBase = (uint16_t)base << 8;
 }
 
 void System65::SetInterruptVector(uint16_t ivec)
 {
-	ATOMIC_WRITE_16(0xFFFE,ivec);
+	Helper_PokeWord(0xFFFE,ivec);
 }
 
 //------------------------------------------------------------------------------
@@ -126,10 +90,19 @@ void System65::SetInterruptVector(uint16_t ivec)
 
 void SYSTEM65CORE System65::Dispatch(void)
 {
-	m_mutMachine.lock();
 #if _DEBUG
 	unsigned int oldcyclecount = m_CycleCount;
 	uint16_t oldpc = pc;
+
+	static bool start_clock = false;
+	static unsigned int curcyclecount; // Cycles since last reset
+
+	// Start the clock
+	if (!start_clock) {
+		start_clock = true;
+		curcyclecount = 0;
+		m_CStart = std::clock();
+	}
 #endif // _DEBUG
 
 	// Yes, a giant switch table. I know that it's a naive way to implement
@@ -501,8 +474,14 @@ void SYSTEM65CORE System65::Dispatch(void)
 
 #if _DEBUG
 	assert(oldcyclecount != m_CycleCount);
-	assert(oldpc != pc);
+	//assert(oldpc != pc);
+	curcyclecount++;
+	if (curcyclecount == 1000000) {
+		m_CStop = std::clock();
+		float time = 1000.0 * (m_CStop - m_CStart) / CLOCKS_PER_SEC;
+		std::cout << "1M insns retired in " << time << "ms (" << 1/time*1000 << "MHz)\n";
+		curcyclecount = 0;
+		start_clock = false;
+	}
 #endif // _DEBUG
-
-	m_mutMachine.unlock();
 }
