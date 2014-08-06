@@ -143,7 +143,7 @@ void SYSTEM65CORE System65::Insn_CMP(void)
 #ifdef DEBUG_PRINT_INSTRUCTION
 	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
-	int8_t val;
+	uint8_t val;
 	switch (memory[pc]) {
 	case 0xc9: // immediate
 		LOCAL_LOADVAL(2,2,Addr_IMM()); break;
@@ -165,11 +165,11 @@ void SYSTEM65CORE System65::Insn_CMP(void)
 		INSN_DECODE_ERROR(); return;
 	}
 
-	Helper_SetClearC((int8_t)a >= val); // carry
+	Helper_SetClearC(a >= val); // carry
 
-	Helper_SetClearZ((int8_t)a == val); // zero
+	Helper_SetClearZ(a == val); // zero
 
-	if (((int8_t)a - val) < 0) // negative
+	if ((a - val) < 0) // negative
 		Helper_SetFlag(System65::PFLAG_N);
 	else
 		Helper_ClearFlag(System65::PFLAG_N);
