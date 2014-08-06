@@ -10,7 +10,7 @@ void SYSTEM65CORE System65::Insn_BCC(void)
 #if _DEBUG
 	ASSERT_INSN(0x90);
 #endif // _DEBUG
-	Helper_SetBranch(!(pf && System65::PFLAG_C));
+	Helper_SetBranch(!(pf & System65::PFLAG_C));
 }
 
 void SYSTEM65CORE System65::Insn_BCS(void)
