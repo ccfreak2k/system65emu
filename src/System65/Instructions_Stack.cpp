@@ -47,7 +47,9 @@ void SYSTEM65CORE System65::Insn_PHP(void)
 	ASSERT_INSN(0x08);
 #endif // _DEBUG
 	m_CycleCount += 3;
-	Helper_PushByte(pf);
+	uint8_t flags = pf;
+	flags |= System65::PFLAG_B;
+	Helper_PushByte(flags);
 	pc += 1;
 }
 
