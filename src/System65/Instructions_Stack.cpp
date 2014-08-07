@@ -61,6 +61,8 @@ void SYSTEM65CORE System65::Insn_PLA(void)
 #endif // _DEBUG
 	m_CycleCount += 4;
 	a = Helper_PopByte();
+	HELPER_SETCLEARFLAG((a == 0),System65::PFLAG_Z);
+	HELPER_SETCLEARFLAG((a>0x7F),System65::PFLAG_N);
 	pc += 1;
 }
 
