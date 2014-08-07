@@ -12,7 +12,7 @@ void SYSTEM65CORE System65::Insn_ADC(void)
 	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
 	// Status: coding complete, needs testing
-	int16_t val,nval;
+	uint16_t val,nval;
 	switch(memory[pc]) {
 	case 0x69: // immediate
 		LOCAL_LOADVAL(2,2,Addr_IMM()); break;
@@ -36,47 +36,39 @@ void SYSTEM65CORE System65::Insn_ADC(void)
 
 	if (Helper_GetFlag(System65::PFLAG_D) != 0) {
 		// BCD mode
-		int16_t vala = (a & 0x0f) + (val & 0x0f) + (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
+#ifdef _DEBUG
+		assert(false && "BCD not supported for ADC yet");
+#endif // _DEBUG
+		uint16_t vala = (a & 0x0f) + (val & 0x0f) + (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
 		if (vala > 9)
 			vala = ((vala + 6) & 0x0f) + 16;
 
-		int16_t valb = (a & 0xf0) + (val & 0xf0) + vala;
+		uint16_t valb = (a & 0xf0) + (val & 0xf0) + vala;
 		if (valb > 160)
 			valb += 96;
 
 		nval = (valb & 0xff);
 
 		Helper_SetClearC((valb > 100));
+		//HELPER_SETCLEARFLAG((valb > 100),System65::PFLAG_C);
 		Helper_ClearFlag(System65::PFLAG_V);
 	} else {
 		// Non-BCD mode
 		// Add w/ carry
-		nval = (val & 0xff) + (a & 0xff) + (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
-		int16_t val6 = (val & 0x7f) + (a & 0x7f) + (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
-
-		// Set flags
-		Helper_SetClearC((val & 0x100) != 0);
-		Helper_SetClearZ((nval == 0));
+		nval = a + val + (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
+		HELPER_SETCLEARFLAG((nval&0xFF00),System65::PFLAG_C); // TODO: Check me for neg values
+		HELPER_SETCLEARFLAG((((a&0x80)==(val&0x80))&&((a&0x80)!=(nval&0x80))),System65::PFLAG_V);
+		HELPER_SETCLEARFLAG(((nval&0xFF)==0),System65::PFLAG_Z);
+		HELPER_SETCLEARFLAG((nval&0x80),System65::PFLAG_N);
 
 		// Overflow occurs when the result is outside of the range -128 - 127.
 		// Here are some examples:
-		//    1 +  1 =    2, V = 0
-		//    1 + -1 =    0, V = 0
-		//  127 +  1 =  128, V = 1
-		// -128 + -1 = -129, V = 1
-		//  127 + -1 =  128, V = 1
+		//    1 +  1      =    2, V = 0
+		//    1 + -1      =    0, V = 0
+		//  127 +  1      =  128, V = 1
+		// -128 + -1      = -129, V = 1
+		//   63 +  64 + 1 =  128, V = 1 (the +1 is the carry if set)
 		// testadc.asm tests ADC and SBC to see if V handling is done correctly.
-
-		// From symon on github
-		if (Helper_GetFlag(System65::PFLAG_C)^((val6 & 0x80) != 0))
-			Helper_SetFlag(System65::PFLAG_V);
-		else
-			Helper_ClearFlag(System65::PFLAG_V);
-
-		if (nval & 0x80) // negative
-			Helper_SetFlag(System65::PFLAG_N);
-		else
-			Helper_ClearFlag(System65::PFLAG_N);
 	}
 
 	// write
@@ -105,37 +97,35 @@ void SYSTEM65CORE System65::Insn_SBC(void)
 		LOCAL_LOADVAL(3,4,Addr_ABY()); break;
 	case 0xe1: // (indirect,x)
 		LOCAL_LOADVAL(2,6,Addr_INX()); break;
-	case 0xd1: // (indirect),y
+	case 0xf1: // (indirect),y
 		LOCAL_LOADVAL(2,5,Addr_INY()); break;
 	default:
 		INSN_DECODE_ERROR(); return;
 	}
 
 	if (Helper_GetFlag(System65::PFLAG_D) != 0) {
+#ifdef _DEBUG
+		assert(false && "BCD not supported for SBC yet");
+#endif // _DEBUG
 	} else {
 		// subtract w/ carry
-		// TODO: Combine with ADC since both operations are largely the same.
-		nval = (~val & 0xff) + (a & 0xff) + (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
-		int16_t val6 = (~val & 0x7f) + (a & 0x7f) + (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
+		nval = a - val - (Helper_GetFlag(System65::PFLAG_C) ? 0 : 1);
+		HELPER_SETCLEARFLAG(!(nval&0xFF00),System65::PFLAG_C); // TODO: check me
+		HELPER_SETCLEARFLAG((((a&0x80)!=(val&0x80))&&((a&0x80)!=(nval&0x80))),System65::PFLAG_V);
+		HELPER_SETCLEARFLAG(((nval&0xFF)==0),System65::PFLAG_Z);
+		HELPER_SETCLEARFLAG((nval&0x80),System65::PFLAG_N);
 
-		// Set flags
-		Helper_SetClearC((val & 0x100) != 0);
-		Helper_SetClearZ((nval == 0));
-
-		// Overflow
-		if (Helper_GetFlag(System65::PFLAG_C)^((val6 & 0x80) != 0))
-			Helper_SetFlag(System65::PFLAG_V);
-		else
-			Helper_ClearFlag(System65::PFLAG_V);
-
-		if (val & 0x80) // negative
-			Helper_SetFlag(System65::PFLAG_N);
-		else
-			Helper_ClearFlag(System65::PFLAG_N);
-
-		// write
-		a = (uint8_t)val;
+		// Overflow occurs when the result is outside of the range -128 - 127.
+		// Here are some examples:
+		//    0 -  1     = -1,   V = 0
+		// -128 -  1     = -129, V = 1
+		//  127 - -1     =  128, V = 1
+		//  -64 - 64 - 1 = -129, V = 1 (the -1 is the carry if clear)
+		// testadc.asm tests ADC and SBC to see if V handling is done correctly.
 	}
+
+	// write
+	a = (uint8_t)nval;
 }
 
 void SYSTEM65CORE System65::Insn_CMP(void)
@@ -169,7 +159,7 @@ void SYSTEM65CORE System65::Insn_CMP(void)
 
 	Helper_SetClearZ(a == val); // zero
 
-	if ((a - val) < 0) // negative
+	if ((a - val)&0x80) // negative
 		Helper_SetFlag(System65::PFLAG_N);
 	else
 		Helper_ClearFlag(System65::PFLAG_N);
@@ -202,7 +192,7 @@ void SYSTEM65CORE System65::Insn_CPX(void)
 	else
 		pf &= ~(System65::PFLAG_Z);
 
-	if ((x - val) < 0) // negative
+	if ((x - val)&0x80) // negative
 		pf |= System65::PFLAG_N;
 	else
 		pf &= ~(System65::PFLAG_N);
@@ -235,7 +225,7 @@ void SYSTEM65CORE System65::Insn_CPY(void)
 	else
 		pf &= ~(System65::PFLAG_Z);
 
-	if ((y - val) < 0) // negative
+	if ((x - val)&0x80) // negative
 		pf |= System65::PFLAG_N;
 	else
 		pf &= ~(System65::PFLAG_N);
