@@ -1,6 +1,6 @@
 ; Original code below by Bruce Clark
 ; Found here:
-; http://www.6502.org/tutorials/decimal_mode.html
+; http://www.6502.org/tutorials/vflag.html
 
 ; Demonstrate that the V flag works as described
 ;
