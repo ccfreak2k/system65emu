@@ -538,9 +538,6 @@ class System65
 		/**
 		 * \param[in] addr Address to write the value to
 		 * \param[in] val Value to write to the specified address
-		 *
-		 * \note Bytes are currently written in big-endian order, although the 6502
-		 * reads/writes 16-bit values in little-endian format.
 		 */
 		void SYSTEM65CORE Helper_PokeWord(uint16_t addr, uint16_t val); //!< Write a word (2 bytes) into memory
 
