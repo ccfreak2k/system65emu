@@ -63,7 +63,7 @@ uint8_t SYSTEM65CORE System65::Helper_PeekByte(uint16_t addr)
 
 uint16_t SYSTEM65CORE System65::Helper_PeekWord(uint16_t addr)
 {
-	return memory[addr+1] + (memory[addr] << 8);
+	return memory[addr] + (memory[addr+1] << 8);
 }
 
 void SYSTEM65CORE System65::Helper_PokeByte(uint16_t addr, uint8_t val)
