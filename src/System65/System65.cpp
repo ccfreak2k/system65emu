@@ -478,7 +478,10 @@ void SYSTEM65CORE System65::Dispatch(void)
 
 	default:
 		printf("Unhandled opcode 0x%.2X @ $%.4X\n",memory[pc],pc);
+		m_InstructionCount--;
 	}
+
+	m_InstructionCount++;
 
 #if _DEBUG
 	assert(oldcyclecount != m_CycleCount);

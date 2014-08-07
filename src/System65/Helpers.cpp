@@ -26,7 +26,7 @@ void SYSTEM65CORE System65::Helper_PushByte(uint8_t val)
 void SYSTEM65CORE System65::Helper_PushWord(uint16_t val)
 {
 	Helper_PushByte(val >> 8);
-	Helper_PushByte(val);
+	Helper_PushByte(val & 0xFF);
 }
 
 uint8_t SYSTEM65CORE System65::Helper_PopByte(void)
@@ -73,7 +73,7 @@ void SYSTEM65CORE System65::Helper_PokeByte(uint16_t addr, uint8_t val)
 
 void SYSTEM65CORE System65::Helper_PokeWord(uint16_t addr, uint16_t val)
 {
-	memory[addr] = val;
+	memory[addr] = val & 0xFF;
 	memory[addr+1] = (val >> 8);
 }
 
@@ -106,4 +106,12 @@ void SYSTEM65CORE System65::Helper_SetClearZ(bool val)
 		Helper_SetFlag(System65::PFLAG_Z);
 	else
 		Helper_ClearFlag(System65::PFLAG_Z);
+}
+
+void SYSTEM65CORE System65::Helper_SetClear(System65::PFLAGS pflag, bool val)
+{
+	if (val)
+		Helper_SetFlag(pflag);
+	else
+		Helper_ClearFlag(pflag);
 }

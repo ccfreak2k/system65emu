@@ -99,6 +99,13 @@
 	regdst = regsrc; \
 	pc += isize
 
+/** Function macro for setting/clearing a flag based on a value. */
+#define HELPER_SETCLEARFLAG(cond,pflag) \
+	if (cond) \
+		Helper_SetFlag(pflag); \
+	else \
+		Helper_ClearFlag(pflag)
+
 /** Function macro for reporting an erroneous instruction decode */
 #define INSN_DECODE_ERROR() \
 	printf("ERROR: %s called with opcode 0x%.2X\n", __FUNCTION__, memory[pc])
@@ -229,6 +236,8 @@ class System65
 	protected:
 	private:
 		unsigned int m_CycleCount; //!< Tracks the number of cycles executed so far.
+
+		unsigned int m_InstructionCount; //!< Tracks the number of instructions retired (executed) so far.
 
 		std::clock_t m_CStart; //!< Starting clock for measuing execution speed
 		std::clock_t m_CStop; //!< Ending clock for measuring execution speed
@@ -529,6 +538,9 @@ class System65
 		/**
 		 * \param[in] addr Address to write the value to
 		 * \param[in] val Value to write to the specified address
+		 *
+		 * \note Bytes are currently written in big-endian order, although the 6502
+		 * reads/writes 16-bit values in little-endian format.
 		 */
 		void SYSTEM65CORE Helper_PokeWord(uint16_t addr, uint16_t val); //!< Write a word (2 bytes) into memory
 
@@ -564,6 +576,14 @@ class System65
 		 * \param[in] val When true, the Z flag is set; when false, the Z flag is cleared.
 		 */
 		void SYSTEM65CORE Helper_SetClearZ(bool val); //!< Sets or clears the Z flag
+
+		/**
+		 * This method sets or clears the chosen flag depending on the value of val.
+		 *
+		 * \param[in] pflag Which flag to set or clear
+		 * \param[in] val When true, the chosen flag is set; when false, the chosen flag is cleared.
+		 */
+		void SYSTEM65CORE System65::Helper_SetClear(System65::PFLAGS pflag, bool val);
 
 		/** @} */
 
