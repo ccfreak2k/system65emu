@@ -15,7 +15,7 @@ void SYSTEM65CORE System65::Insn_JMP(void)
 		break;
 	case 0x6c: // indirect
 		m_CycleCount += 5;
-		pc = memory[Addr_IND()];
+		pc = Helper_PeekWord(Addr_IND());
 		break;
 	default:
 		INSN_DECODE_ERROR(); break;
