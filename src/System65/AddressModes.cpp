@@ -41,9 +41,7 @@ uint16_t SYSTEM65CORE System65::Addr_IMM(void)
 // (Indirect)
 uint16_t SYSTEM65CORE System65::Addr_IND(void)
 {
-	// FIXME: Make sure this is correct
-	// In memory, address is stored as: LSB MSB
-	return (uint16_t)((uint16_t)memory[pc+2]+((uint16_t)memory[pc+1] << 8));
+	return (uint16_t)((uint16_t)memory[pc+1]+((uint16_t)memory[pc+2] << 8));
 }
 
 // (Indirect,X)
@@ -56,7 +54,7 @@ uint16_t SYSTEM65CORE System65::Addr_INX(void)
 	//uint16_t addr = memory[(memory[pc+1]+x)&0x00ff]
 	//return (uint16_t)(((uint16_t)((addr)+1)<<4)+(uint16_t)(addr));
 	uint16_t addr = memory[pc+1]+x;
-	return (uint16_t)(((uint16_t)(memory[(addr+1)&0x00ff])<<8)+(uint16_t)(memory[addr&0x00ff]));
+	return (uint16_t)(((uint16_t)(memory[(addr+1)&0xff])<<8)+(uint16_t)(memory[addr&0xff]));
 }
 
 // (Indirect),Y
@@ -81,11 +79,11 @@ uint16_t SYSTEM65CORE System65::Addr_ZPG(void)
 // Zeropage,X
 uint16_t SYSTEM65CORE System65::Addr_ZPX(void)
 {
-	return memory[(memory[pc+1]+x)&0x00ff];
+	return memory[(memory[pc+1]+x)&0xff];
 }
 
 // Zeropage,Y
 uint16_t SYSTEM65CORE System65::Addr_ZPY(void)
 {
-	return memory[(memory[pc+1]+y)&0x00ff];
+	return memory[(memory[pc+1]+y)&0xff];
 }
