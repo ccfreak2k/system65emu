@@ -34,7 +34,7 @@ void SYSTEM65CORE System65::Insn_PHA(void)
 	ASSERT_INSN(0x48);
 #endif // _DEBUG
 	m_CycleCount += 3;
-	Helper_PushByte(a);
+	Helper_Push(a);
 	pc += 1;
 }
 
@@ -49,7 +49,7 @@ void SYSTEM65CORE System65::Insn_PHP(void)
 	m_CycleCount += 3;
 	uint8_t flags = pf;
 	flags |= System65::PFLAG_B;
-	Helper_PushByte(flags);
+	Helper_Push(flags);
 	pc += 1;
 }
 
@@ -78,6 +78,10 @@ void SYSTEM65CORE System65::Insn_PLP(void)
 #endif // _DEBUG
 	m_CycleCount += 4;
 	pf = Helper_PopByte();
-	pf |= System65::PFLAG_R;
+	Helper_SetFlag(System65::PFLAG_R);
+	if (m_BreakFlagSet)
+		Helper_SetFlag(System65::PFLAG_B);
+	else
+		Helper_ClearFlag(System65::PFLAG_B);
 	pc += 1;
 }

@@ -2,6 +2,7 @@
 
 // System operations
 
+// TODO: Make sure PC is stored correctly after this is run
 void SYSTEM65CORE System65::Insn_BRK(void)
 {
 #ifdef DEBUG_PRINT_INSTRUCTION
@@ -11,11 +12,9 @@ void SYSTEM65CORE System65::Insn_BRK(void)
 	ASSERT_INSN(0x00);
 #endif // _DEBUG
 	// PC, FLAGS
-	m_CycleCount += 7;
-	Helper_PushWord(pc);
-	Helper_PushByte(pf);
-	Helper_SetFlag(System65::PFLAG_B);
-	pc = Helper_PeekWord(0xFFFE);
+	// BRK is handled very much like an interrupt on a real 6502, so we don't
+	// bother doing anything here other than scheduling it.
+	Helper_SetInterrupt(false, true);
 }
 
 void SYSTEM65CORE System65::Insn_NOP(void)
@@ -40,11 +39,10 @@ void SYSTEM65CORE System65::Insn_RTI(void)
 #endif // _DEBUG
 	m_CycleCount += 6;
 	pf = Helper_PopByte();
-	// Food for thought: The user can arbitrarily set flags while they're in
-	// memory. The B flag is only set when servicing a software (BRK-triggered)
-	// interrupt. With that in mind, is it proper to clear the B flag here, or
-	// does it need to keep the value from memory?
-	Helper_SetFlag(System65::PFLAG_R);
 	Helper_ClearFlag(System65::PFLAG_B);
+	Helper_ClearFlag(System65::PFLAG_I);
 	pc = Helper_PopWord();
+	if (m_BreakFlagSet)
+		pc += 2;
+	m_BreakFlagSet = false;
 }

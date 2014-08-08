@@ -17,16 +17,16 @@ void SYSTEM65CORE System65::Helper_Set_ZN_Flags(uint8_t reg)
 		pf &= ~(System65::PFLAG_N);
 }
 
-void SYSTEM65CORE System65::Helper_PushByte(uint8_t val)
+void SYSTEM65CORE System65::Helper_Push(uint8_t val)
 {
 	memory[m_StackBase+s] = val;
 	s--;
 }
 
-void SYSTEM65CORE System65::Helper_PushWord(uint16_t val)
+void SYSTEM65CORE System65::Helper_Push(uint16_t val)
 {
-	Helper_PushByte(val >> 8);
-	Helper_PushByte(val & 0xFF);
+	Helper_Push((uint8_t)(val >> 8));
+	Helper_Push((uint8_t)(val & 0xFF));
 }
 
 uint8_t SYSTEM65CORE System65::Helper_PopByte(void)
@@ -66,12 +66,12 @@ uint16_t SYSTEM65CORE System65::Helper_PeekWord(uint16_t addr)
 	return memory[addr] + (memory[addr+1] << 8);
 }
 
-void SYSTEM65CORE System65::Helper_PokeByte(uint16_t addr, uint8_t val)
+void SYSTEM65CORE System65::Helper_Poke(uint16_t addr, uint8_t val)
 {
 	memory[addr] = val;
 }
 
-void SYSTEM65CORE System65::Helper_PokeWord(uint16_t addr, uint16_t val)
+void SYSTEM65CORE System65::Helper_Poke(uint16_t addr, uint16_t val)
 {
 	memory[addr] = val & 0xFF;
 	memory[addr+1] = (val >> 8);
@@ -114,4 +114,46 @@ void SYSTEM65CORE System65::Helper_SetClear(System65::PFLAGS pflag, bool val)
 		Helper_SetFlag(pflag);
 	else
 		Helper_ClearFlag(pflag);
+}
+
+void SYSTEM65CORE System65::Helper_SetInterrupt(bool nmi, bool sbrk)
+{
+	if ((!nmi) && (!sbrk)) { // F,F = IRQ
+		m_BreakFlagSet = false;
+		m_GenerateInterrupt = true;
+		m_NMInterrupt = false;
+		m_InterruptVector = 0xFFFE;
+	} else if ((nmi) && (!sbrk)) { // T,F = NMI
+		m_BreakFlagSet = false;
+		m_GenerateInterrupt = true;
+		m_NMInterrupt = true;
+		m_InterruptVector = 0xFFFA;
+	} else if ((!nmi) && (sbrk)){ // F,T = BRK
+		m_BreakFlagSet = true;
+		m_GenerateInterrupt = true;
+		m_NMInterrupt = false;
+		m_InterruptVector = 0xFFFE;
+	} else // catchall
+		assert(false && "impossible interrupt flag combination at Helper_SetInterrupt()");
+}
+
+bool SYSTEM65CORE System65::Helper_HandleInterrupt(void)
+{
+	assert(!m_GenerateInterrupt && "Helper_HandleInterrupt() called when no interrupt scheduled");
+	m_GenerateInterrupt = false;
+
+	// First, can we service it?
+	// If I is set, IRQ and BRK are skipped
+	if (Helper_GetFlag(System65::PFLAG_I) && !m_NMInterrupt)
+		return false;
+
+	// From here either I is clear or this is an NMI.
+	Helper_Push(pc);
+	if (m_BreakFlagSet)
+		Helper_SetFlag(System65::PFLAG_B);
+	Helper_Push(pf);
+	Helper_SetFlag(System65::PFLAG_I);
+	pc = m_InterruptVector;
+	m_CycleCount += 7;
+	return true;
 }

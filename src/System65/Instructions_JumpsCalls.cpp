@@ -32,7 +32,7 @@ void SYSTEM65CORE System65::Insn_JSR(void)
 #endif // _DEBUG
 
 	m_CycleCount += 6;
-	Helper_PushWord(pc+2);
+	Helper_Push((uint16_t)(pc+2));
 	//printf("[DEBUG] pc = 0x%.4X\n", pc);
 	pc = Addr_ABS();
 	//printf("[DEBUG] pc = 0x%.4X\n", pc);

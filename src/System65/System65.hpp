@@ -62,6 +62,13 @@
  * accurate cycle penalty for cross-page reads).
  *
  * \todo A pointer table might be faster than a switch for instruction decoding.
+ *
+ * \todo Make sure m_breakFlagSet is set/cleared when appropriate, and make sure
+ * that the value is obeyed when pushing/pulling pf. Maybe use a gating method
+ * like "Helper_PushFlags()"?
+ *
+ * \todo Handle the case where a second NMI is generated when one is already
+ * being serviced. Do we stall it? Find some way to stack them? Mask it out?
  */
 
 /** \def FASTEMU When defined, functions will be inlined for speed. May increase code size heavily.
@@ -173,6 +180,91 @@ class System65
 		/** Returns the contents of the program counter register. */
 		uint16_t GetRegister_PC(void) { return pc; };
 
+		/** Returns the byte at the given address in the vm's memory.
+		 *
+		 * \param[in] addr Address to retrieve the byte from
+		 *
+		 * \return The byte value at the given address.
+		 */
+		uint8_t PeekByte(uint16_t addr) { return Helper_PeekByte(addr); }
+
+		/** Returns the word at the given address in the vm's memory.
+		 *
+		 * \param[in] addr Address to retrieve the word from
+		 *
+		 * \return The word value at the given address.
+		 *
+		 * \note The 6502 uses little-endian format for multi-byte values; this
+		 * method obeys that endianness, regardless of platform.
+		 */
+		uint16_t PeekWord(uint16_t addr) { return Helper_PeekWord(addr); }
+
+		/** Writes <tt>val</tt> to memory at <tt>addr</tt>.
+		 *
+		 * \param[in] addr Address to write the value to
+		 * \param[in] val Value to write to the given address
+		 */
+		void Poke(uint16_t addr, uint8_t val) { Helper_Poke(addr,val); }
+
+		/** Writes <tt>val</tt> to memory at <tt>addr</tt>.
+		 *
+		 * \param[in] addr Address to write the value to
+		 * \param[in] val Value to write to the given address
+		 *
+		 * \note The 6502 uses little-endian format for multi-byte values; this
+		 * method obeys that endianness, regardless of platform.
+		 */
+		void Poke(uint16_t addr, uint16_t val) { Helper_Poke(addr,val); }
+
+		/** Pushes a byte to the virtual CPU's stack
+		 *
+		 * \param[in] val Value to push onto the stack
+		 */
+		void Push(uint8_t val) { Helper_Push(val); }
+
+		/** Pushes a word to the virtual CPU's stack
+		*
+		* \param[in] val Value to push onto the stack
+		*
+		* \note The 6502 uses little-endian format for multi-byte values; this
+		* method obeys that endianness, regardless of platform.
+		*/
+		void Push(uint16_t val) { Helper_Push(val); }
+
+		/** Pops a byte off of the virtual CPU's stack
+		 *
+		 * \return The byte at the top of the stack
+		 */
+		uint8_t PopByte(void) { return Helper_PopByte(); }
+
+		/** Pops a word off of the virtual CPU's stack
+		 *
+		 * \return The word at the top of the stack
+		 *
+		 * \note The 6502 uses little-endian format for multi-byte values; this
+		 * method obeys that endianness, regardless of platform.
+		 */
+		uint16_t PopWord(void) { return Helper_PopWord(); }
+
+		/** Generates an external interrupt
+		 *
+		 * When called, an interrupt will be generated before the next
+		 * instruction executes. A generated interrupt may be maskable (IRQ) or
+		 * non-maskable (NMI). A maskable interrupt may be ignored if the I flag
+		 * is set or if another interrupt is currently being handled; a
+		 * non-maskable interrupt will always interrupt the CPU.
+		 *
+		 * \param[in] nmi Whether this generated interrupt should be maskable
+		 * (IRQ) or non-maskable (NMI).
+		 *
+		 * \note Although the <tt>RESET</tt> signal is considered an interrupt
+		 * from a technical standpoint, it is currently handled independent of
+		 * this method.
+		 *
+		 * \see Reset
+		 */
+		void Interrupt(bool nmi);
+
 		/** Sets the stack base page
 		 *
 		 * By default the stack page is 0x02 (effective start address is
@@ -243,6 +335,24 @@ class System65
 		std::clock_t m_CStop; //!< Ending clock for measuring execution speed
 
 		uint16_t m_StackBase; //!< Base address that the stack resides at
+
+		bool m_GenerateInterrupt; //!< Whether an interrupt is to be generated on the next tick \see Interrupt
+		bool m_NMInterrupt; //!< Whether the generated interrupt is non-maskable \see m_Interrupt
+		uint16_t m_InterruptVector; //!< Which address the next interrupt should vector to \see Interrupt
+
+		/**
+		 * The B flag is not an actual flag but is instead a bit set internally.
+		 * What this means from a practical standpoint is that the B flag can't
+		 * be cleared or set by code normally; instead, it's pushed as set when
+		 * BRK or PHP is executed and pushed as clear when an IRQ or NMI occurs.
+		 * Even after a BRK returns or if a byte is popped with 0x10 clear, the
+		 * B flag will remain set, and will continue to be set unless an IRQ or
+		 * NMI occurs (i.e. if an external interrupt never occurs, the B flag
+		 * will remain set). The B flag is only meaningful within interrupt
+		 * handlers anyway, so programmers don't need to worry too much about
+		 * it.
+		 */
+		bool m_BreakFlagSet; //!< Indicates whether or not the B flag should be set whenever the flags are pushed or pulled.
 
 		/** \defgroup 65regs 6502 Registers
 		 *
@@ -493,9 +603,9 @@ class System65
 		 */
 		void SYSTEM65CORE Helper_Set_ZN_Flags(uint8_t reg); //!< Sets the Zero/Negative flags
 
-		void SYSTEM65CORE Helper_PushByte(uint8_t val); //!< Push a single byte onto the stack
+		void SYSTEM65CORE Helper_Push(uint8_t val); //!< Push a single byte onto the stack
 
-		void SYSTEM65CORE Helper_PushWord(uint16_t val); //!< Push a word (two bytes) onto the stack
+		void SYSTEM65CORE Helper_Push(uint16_t val); //!< Push a word (two bytes) onto the stack
 
 		/**
 		 * \return byte popped from the stack
@@ -533,13 +643,13 @@ class System65
 		 * \param[in] addr Address to write the value to
 		 * \param[in] val Value to write to the specified address
 		 */
-		void SYSTEM65CORE Helper_PokeByte(uint16_t addr, uint8_t val); //!< Write a byte into memory
+		void SYSTEM65CORE Helper_Poke(uint16_t addr, uint8_t val); //!< Write a byte into memory
 
 		/**
 		 * \param[in] addr Address to write the value to
 		 * \param[in] val Value to write to the specified address
 		 */
-		void SYSTEM65CORE Helper_PokeWord(uint16_t addr, uint16_t val); //!< Write a word (2 bytes) into memory
+		void SYSTEM65CORE Helper_Poke(uint16_t addr, uint16_t val); //!< Write a word (2 bytes) into memory
 
 		/**
 		 * \param[in] flag Flag to set
@@ -580,7 +690,29 @@ class System65
 		 * \param[in] pflag Which flag to set or clear
 		 * \param[in] val When true, the chosen flag is set; when false, the chosen flag is cleared.
 		 */
-		void SYSTEM65CORE System65::Helper_SetClear(System65::PFLAGS pflag, bool val);
+		void SYSTEM65CORE Helper_SetClear(System65::PFLAGS pflag, bool val);
+
+		/** Internal helper method for generating an interrupt
+		 *
+		 * This method generates an interrupt for the CPU core. Three of the
+		 * four interrupts types are generated here (BRK, IRQ and NMI). The
+		 * RESET interrupt is handled independently at the moment.
+		 *
+		 * It is an error for both nmi and sbrk to be set to TRUE.
+		 *
+		 * \param[in] nmi Whether this is a maskable or non-maskable interrupt.
+		 * \param[in] sbrk Whether this is a a software (BRK) interrupt.
+		 */
+		void SYSTEM65CORE Helper_SetInterrupt(bool nmi, bool sbrk);
+
+		/** Handles the pending interrupt condition
+		 *
+		 * The return value denotes whether the interrupt was serviced.
+		 *
+		 * \return Returns <tt>true</tt> if the interrupt was run, or
+		 * <tt>false</tt> if the interrupt was skipped.
+		 */
+		bool SYSTEM65CORE Helper_HandleInterrupt(void);
 
 		/** @} */
 
