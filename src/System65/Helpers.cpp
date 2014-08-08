@@ -139,7 +139,7 @@ void SYSTEM65CORE System65::Helper_SetInterrupt(bool nmi, bool sbrk)
 
 bool SYSTEM65CORE System65::Helper_HandleInterrupt(void)
 {
-	assert(!m_GenerateInterrupt && "Helper_HandleInterrupt() called when no interrupt scheduled");
+	assert(m_GenerateInterrupt && "Helper_HandleInterrupt() called when no interrupt scheduled");
 	m_GenerateInterrupt = false;
 
 	// First, can we service it?
@@ -148,12 +148,10 @@ bool SYSTEM65CORE System65::Helper_HandleInterrupt(void)
 		return false;
 
 	// From here either I is clear or this is an NMI.
-	Helper_Push(pc);
-	if (m_BreakFlagSet)
-		Helper_SetFlag(System65::PFLAG_B);
-	Helper_Push(pf);
+	Helper_Push(m_BreakFlagSet ? (uint16_t)(pc+2) : pc);
+	Helper_Push((uint8_t)(pf | (m_BreakFlagSet ? System65::PFLAG_B : 0x00)));
 	Helper_SetFlag(System65::PFLAG_I);
-	pc = m_InterruptVector;
+	pc = Helper_PeekWord(m_InterruptVector);
 	m_CycleCount += 7;
 	return true;
 }

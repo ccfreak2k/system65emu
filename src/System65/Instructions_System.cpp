@@ -11,9 +11,9 @@ void SYSTEM65CORE System65::Insn_BRK(void)
 #if _DEBUG
 	ASSERT_INSN(0x00);
 #endif // _DEBUG
-	// PC, FLAGS
 	// BRK is handled very much like an interrupt on a real 6502, so we don't
 	// bother doing anything here other than scheduling it.
+	Helper_ClearFlag(System65::PFLAG_D);
 	Helper_SetInterrupt(false, true);
 }
 
@@ -42,7 +42,5 @@ void SYSTEM65CORE System65::Insn_RTI(void)
 	Helper_ClearFlag(System65::PFLAG_B);
 	Helper_ClearFlag(System65::PFLAG_I);
 	pc = Helper_PopWord();
-	if (m_BreakFlagSet)
-		pc += 2;
 	m_BreakFlagSet = false;
 }
