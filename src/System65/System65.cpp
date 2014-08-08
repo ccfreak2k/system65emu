@@ -497,8 +497,10 @@ void SYSTEM65CORE System65::Dispatch(void)
 	}
 
 #if _DEBUG
-	assert(oldcyclecount != m_CycleCount);
-	assert(oldpc != pc);
+	if (!m_GenerateInterrupt) {
+		assert(oldcyclecount != m_CycleCount);
+		assert(oldpc != pc);
+	}
 	curcyclecount++;
 	if (curcyclecount == 1000000) {
 		m_CStop = std::clock();
