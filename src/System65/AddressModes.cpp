@@ -17,19 +17,22 @@ uint16_t SYSTEM65CORE System65::Addr_ABS(void)
 {
 	// FIXME: JMP doesn't use this as a pointer (see insn 0x4c); make sure
 	// other callers are using it correctly as well.
-	return (uint16_t)((uint16_t)(memory[pc+2] << 8) + (uint16_t)memory[pc+1]);
+	//return (uint16_t)((uint16_t)(memory[pc+2] << 8) + (uint16_t)memory[pc+1]);
+	return Helper_PeekWord(pc+1);
 }
 
 // Absolute,X
 uint16_t SYSTEM65CORE System65::Addr_ABX(void)
 {
-	return (uint16_t)((uint16_t)(memory[pc+2] << 8) + (uint16_t)memory[pc+1]) + x;
+	//return (uint16_t)((uint16_t)(memory[pc+2] << 8) + (uint16_t)memory[pc+1]) + x;
+	return Helper_PeekWord(pc+1)+x;
 }
 
 // Absolute,y
 uint16_t SYSTEM65CORE System65::Addr_ABY(void)
 {
-	return (uint16_t)((uint16_t)(memory[pc+2] << 8) + (uint16_t)memory[pc+1]) + y;
+	//return (uint16_t)((uint16_t)(memory[pc+2] << 8) + (uint16_t)memory[pc+1]) + y;
+	return Helper_PeekWord(pc+1)+y;
 }
 
 // Immediate
@@ -71,19 +74,19 @@ uint16_t SYSTEM65CORE System65::Addr_INY(void)
 uint16_t SYSTEM65CORE System65::Addr_REL(void){ assert(false); return 0; }
 
 // Zeropage
-uint16_t SYSTEM65CORE System65::Addr_ZPG(void)
+uint8_t SYSTEM65CORE System65::Addr_ZPG(void)
 {
-	return (uint16_t)memory[pc+1];
+	return memory[pc+1];
 }
 
 // Zeropage,X
-uint16_t SYSTEM65CORE System65::Addr_ZPX(void)
+uint8_t SYSTEM65CORE System65::Addr_ZPX(void)
 {
-	return memory[(memory[pc+1]+x)&0xff];
+	return memory[pc+1]+x;
 }
 
 // Zeropage,Y
-uint16_t SYSTEM65CORE System65::Addr_ZPY(void)
+uint8_t SYSTEM65CORE System65::Addr_ZPY(void)
 {
-	return memory[(memory[pc+1]+y)&0xff];
+	return memory[pc+1]+y;
 }

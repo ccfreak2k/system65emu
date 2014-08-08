@@ -551,7 +551,7 @@ class System65
 		 * For an instruction <tt>OPC $LL</tt>, the operand represents the low
 		 * byte of an address in the zeropage (<tt>$0000</tt>-<tt>$00FF</tt>) range.
 		 */
-		uint16_t SYSTEM65CORE Addr_ZPG(void); //!< Operand is a one-byte address in the zeropage.
+		uint8_t SYSTEM65CORE Addr_ZPG(void); //!< Operand is a one-byte address in the zeropage.
 
 		/**
 		 * The address to be accessed by an instruction using indexed zero page
@@ -566,7 +566,7 @@ class System65
 		 * <tt>LDA $FF,X</tt> with <tt>X</tt> having a value of <tt>$01</tt> will cause the
 		 * effective address to be <tt>$0000</tt>.
 		 */
-		uint16_t SYSTEM65CORE Addr_ZPX(void); //!< Zeropage, X-indexed (<tt>$0000</tt> + <tt>X</tt>)
+		uint8_t SYSTEM65CORE Addr_ZPX(void); //!< Zeropage, X-indexed (<tt>$0000</tt> + <tt>X</tt>)
 
 		/**
 		 * The address to be accessed by an instruction using indexed zero page
@@ -576,7 +576,7 @@ class System65
 		 *
 		 * \note This mode is only used with the LDX and STX instructions.
 		 */
-		uint16_t SYSTEM65CORE Addr_ZPY(void); //!< Zeropage, Y-indexed (<tt>$0000</tt> + <tt>Y</tt>)
+		uint8_t SYSTEM65CORE Addr_ZPY(void); //!< Zeropage, Y-indexed (<tt>$0000</tt> + <tt>Y</tt>)
 		/** @} */
 
 		/** Runs a single instruction.

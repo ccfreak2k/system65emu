@@ -210,7 +210,7 @@ void SYSTEM65CORE System65::Insn_CPY(void)
 	case 0xc4: // zeropage
 		LOCAL_LOADVAL(2,3,Addr_ZPG()); break;
 	case 0xcc: // absolute
-		LOCAL_LOADVAL(2,3,Addr_ABS()); break;
+		LOCAL_LOADVAL(3,3,Addr_ABS()); break;
 	default:
 		INSN_DECODE_ERROR(); return;
 	}
