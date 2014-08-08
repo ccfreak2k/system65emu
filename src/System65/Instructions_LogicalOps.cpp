@@ -107,13 +107,16 @@ void SYSTEM65CORE System65::Insn_BIT(void)
 	case 0x24: // zeropage
 		m_CycleCount += 3;
 		val = memory[Addr_ZPG()];
+		pc += 2;
+		break;
 	case 0x2c: // absolute
 		m_CycleCount += 4;
 		val = memory[Addr_ABS()];
+		pc += 3;
+		break;
 	default:
 		INSN_DECODE_ERROR(); return;
 	}
-	pc += 2;
 
 	if (a & val)
 		pf &= ~System65::PFLAG_Z;
