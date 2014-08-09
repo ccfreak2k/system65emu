@@ -5,16 +5,12 @@
 #define LOCAL_ASL(isize,ccount,addrmode) \
 	m_CycleCount += ccount; \
 	addr = addrmode; \
-	if (memory[addr] == 0) \
-		pf |= System65::PFLAG_Z; \
-	else {\
-			if (memory[addr] & 0x80) \
-				pf |= System65::PFLAG_C; \
-			memory[addr] *= 2; \
-			if (memory[addr] & 0x80) \
-				pf |= System65::PFLAG_N; \
-	} \
+	Helper_SetClear(System65::PFLAG_Z,(memory[addr] == 0)); \
+	Helper_SetClear(System65::PFLAG_C,((memory[addr] & 0x80)!=0)); \
+	memory[addr] *= 2; \
+	Helper_SetClear(System65::PFLAG_N,((memory[addr] & 0x80)!=0)); \
 	pc += isize
+
 void SYSTEM65CORE System65::Insn_ASL(void)
 {
 #ifdef DEBUG_PRINT_INSTRUCTION
@@ -24,15 +20,10 @@ void SYSTEM65CORE System65::Insn_ASL(void)
 	switch(memory[pc]) {
 	case 0x0a: // accumulator
 		m_CycleCount += 2;
-		if (a == 0)
-			pf |= System65::PFLAG_Z;
-		else {
-			if (a & 0x80)
-				pf |= System65::PFLAG_C;
-			a *= 2;
-			if (a & 0x80)
-				pf |= System65::PFLAG_N;
-		}
+		Helper_SetClear(System65::PFLAG_Z,(a == 0));
+		Helper_SetClear(System65::PFLAG_C,((a & 0x80)!=0));
+		a *= 2;
+		Helper_SetClear(System65::PFLAG_N,((a & 0x80)!=0));
 		pc += 1;
 		break;
 	case 0x06: // zeropage
@@ -49,20 +40,15 @@ void SYSTEM65CORE System65::Insn_ASL(void)
 }
 #undef LOCAL_ASL
 
-// TODO: Does C need to be cleared too?
 #define LOCAL_LSR(isize,ccount,addrmode) \
-		m_CycleCount += ccount; \
-		addr = addrmode; \
-		if (memory[addr] == 0) \
-			pf |= System65::PFLAG_Z; \
-		else { \
-			if (memory[addr] & 0x01) \
-				pf |= System65::PFLAG_C; \
-			memory[addr] /= 2;  \
-			if (memory[addr] & 0x80) \
-				pf |= System65::PFLAG_N; \
-		} \
-		pc += isize
+	m_CycleCount += ccount; \
+	addr = addrmode; \
+	Helper_SetClear(System65::PFLAG_Z,(memory[addr] == 0)); \
+	Helper_SetClear(System65::PFLAG_C,((memory[addr] & 0x80)!=0)); \
+	memory[addr] /= 2; \
+	Helper_SetClear(System65::PFLAG_N,((memory[addr] & 0x80)!=0)); \
+	pc += isize
+
 void SYSTEM65CORE System65::Insn_LSR(void)
 {
 #ifdef DEBUG_PRINT_INSTRUCTION
@@ -72,15 +58,10 @@ void SYSTEM65CORE System65::Insn_LSR(void)
 	switch (memory[pc]) {
 	case 0x4a: // accumulator
 		m_CycleCount += 2;
-		if (a == 0)
-			pf |= System65::PFLAG_Z;
-		else {
-			if (a & 0x01)
-				pf |= System65::PFLAG_C;
-			a /= 2;
-			if (a & 0x80)
-				pf |= System65::PFLAG_N;
-		}
+		Helper_SetClear(System65::PFLAG_Z,(a == 0));
+		Helper_SetClear(System65::PFLAG_C,((a & 0x80)!=0));
+		a /= 2;
+		Helper_SetClear(System65::PFLAG_N,((a & 0x80)!=0));
 		pc += 1;
 		break;
 	case 0x46: // zeropage
