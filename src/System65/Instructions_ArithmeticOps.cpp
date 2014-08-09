@@ -225,7 +225,7 @@ void SYSTEM65CORE System65::Insn_CPY(void)
 	else
 		pf &= ~(System65::PFLAG_Z);
 
-	if ((x - val)&0x80) // negative
+	if ((y - val)&0x80) // negative
 		pf |= System65::PFLAG_N;
 	else
 		pf &= ~(System65::PFLAG_N);
