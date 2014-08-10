@@ -55,7 +55,7 @@ class SDLContext
 		/** Loads a font bitmap for rendering
 		 * \param[in] filename Filename of the font bitmap to use, default "font.bmp"
 		 */
-		void LoadFont(const char *filename = "font.bmp")
+		void LoadFont(const char *filename = "font.bmp");
 	protected:
 	private:
 		SDL_Renderer *m_SDLRenderer; //!< SDL renderer handle

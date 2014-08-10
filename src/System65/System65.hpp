@@ -19,66 +19,10 @@
  * Interface for the \ref System65 class.
  */
 
-/** \class System65
- * The System65 class.
- *
- * This class is the class that represents a System65 computer as a whole. It
- * encompasses everything that a System65 computer needs to run, including its
- * memory, CPU, execution state, etc.
- *
- * This class contains a full 6502 core with customizations specific to
- * System65.
- *
- * System65 system memory is internally allocated as a single 64KB block of
- * data; specifying a smaller amount when instancing merely changes
- * \ref memorysize. Accesses to memory "outside" of this range is allowed to
- * allow DMA to devices such as the screen.
- *
- * The machine can be set to execute only a certain number of cycles at a time.
- * By calling \ref Tick with a value, the machine will run until that number of
- * cycles has been run, at which point it will return. The machine state will
- * be preserved, and simply calling \ref Tick again will allow it to continue.
- * By periodically sampling the machine state, it is possible to follow
- * execution to a certain extent. Passing a value of 0 will cause \ref Tick to
- * return immediately, and no instructions will be executed.
- *
- * Some future ideas:
- *
- * * Turn the memory[] array into a general "bus" and give pointer/size to
- *   devices that want memory, in addition to main memory being allocated out of
- *   the same pool. OOB access wouldn't be an issue anymore, since in the worst
- *   case a value is read/written from actual memory as the pointers are 16 bits
- *   anyway.
- *
- * * Extensions for memory management and/or vector computation. This is rather
- *   complicated by the fact that the 6502 lacks hardware multiplication
- *   support, instead relying on the programmer to code their own
- *   implementation. Perhaps instead we could add ATC (Add Triple with Carry)
- *   and STC (Subtract Triple with Carry) and leave the rest to the programmers.
- *
- * \author ccfreak2k
- *
- * \todo Increment the cycle count in each stage of execution (allows for
- * accurate cycle penalty for cross-page reads).
- *
- * \todo A pointer table might be faster than a switch for instruction decoding.
- *
- * \todo Make sure m_breakFlagSet is set/cleared when appropriate, and make sure
- * that the value is obeyed when pushing/pulling pf. Maybe use a gating method
- * like "Helper_PushFlags()"?
- *
- * \todo Handle the case where a second NMI is generated when one is already
- * being serviced. Do we stall it? Find some way to stack them? Mask it out?
- */
-
-/** \def FASTEMU When defined, functions will be inlined for speed. May increase code size heavily.
- *
- * \note Best to leave this disabled for now, as gcc/msvc can only inline within
- * the translation unit unless LTO/LTCG is used.
- */
 #ifdef FASTEMU
 	#define SYSTEM65CORE inline
 #else
+	/** Prefix for core functions of the System65 class. */
 	#define SYSTEM65CORE
 #endif
 
@@ -122,8 +66,63 @@
 #define PRINT_INSTRUCTION() \
 	printf("[DEBUG] %s, pc = 0x%.4X\n", __FUNCSIG__, pc)
 #else
+#define PRINT_INSTRUCTION)() \
 	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc)
 #endif // defined(_MSC_VER) && !defined(__MINGW32__)
+
+/** \class System65
+ * The System65 CPU emulator class.
+ *
+ * This class is the class that represents a System65 computer as a whole. It
+ * encompasses everything that a System65 computer needs to run, including its
+ * memory, CPU, execution state, etc.
+ *
+ * This class contains a full 6502 core with customizations specific to
+ * System65.
+ *
+ * System65 system memory is internally allocated as a single 64KB block of
+ * data; specifying a smaller amount when instancing merely changes
+ * memorysize. Accesses to memory "outside" of this range is allowed to
+ * allow DMA to devices such as the screen.
+ *
+ * The machine can be set to execute only a certain number of cycles at a time.
+ * By calling Tick() with a value, the machine will run until that number of
+ * cycles has been run, at which point it will return. The machine state will
+ * be preserved, and simply calling Tick() again will allow it to continue.
+ * By periodically sampling the machine state, it is possible to follow
+ * execution to a certain extent. Passing a value of 0 will cause Tick() to
+ * return immediately, and no instructions will be executed.
+ *
+ * Some future ideas:
+ *
+ * * Turn the memory[] array into a general "bus" and give pointer/size to
+ *   devices that want memory, in addition to main memory being allocated out of
+ *   the same pool. OOB access wouldn't be an issue anymore, since in the worst
+ *   case a value is read/written from actual memory as the pointers are 16 bits
+ *   anyway.
+ *
+ * * Extensions for memory management and/or vector computation. This is rather
+ *   complicated by the fact that the 6502 lacks hardware multiplication
+ *   support, instead relying on the programmer to code their own
+ *   implementation. Perhaps instead we could add ATC (Add Triple with Carry)
+ *   and STC (Subtract Triple with Carry) and leave the rest to the programmers.
+ *
+ * \author ccfreak2k
+ *
+ * \todo Increment the cycle count in each stage of execution (allows for
+ * accurate cycle penalty for cross-page reads).
+ *
+ * \todo A pointer table might be faster than a switch for instruction decoding.
+ *
+ * \todo Make sure m_breakFlagSet is set/cleared when appropriate, and make sure
+ * that the value is obeyed when pushing/pulling pf. Maybe use a gating method
+ * like "Helper_PushFlags()"?
+ *
+ * \todo Handle the case where a second NMI is generated when one is already
+ * being serviced. Do we stall it? Find some way to stack them? Mask it out?
+ *
+ * \nosubgrouping
+ */
 
 class System65
 {
@@ -138,7 +137,8 @@ class System65
 		 */
 		System65(unsigned int memsize = 0x1000);
 
-		/** Destroys the System65 context */
+		/** Destroys the System65 context
+		 */
 		~System65();
 
 		/** Runs 1 instruction of the CPU and returns.
@@ -340,7 +340,9 @@ class System65
 		bool m_NMInterrupt; //!< Whether the generated interrupt is non-maskable \see m_Interrupt
 		uint16_t m_InterruptVector; //!< Which address the next interrupt should vector to \see Interrupt
 
-		/**
+		/** Indicates whether or not the B flag should be set whenever the flags
+		 * are pushed or pulled.
+		 *
 		 * The B flag is not an actual flag but is instead a bit set internally.
 		 * What this means from a practical standpoint is that the B flag can't
 		 * be cleared or set by code normally; instead, it's pushed as set when
@@ -352,11 +354,12 @@ class System65
 		 * handlers anyway, so programmers don't need to worry too much about
 		 * it.
 		 */
-		bool m_BreakFlagSet; //!< Indicates whether or not the B flag should be set whenever the flags are pushed or pulled.
+		bool m_BreakFlagSet;
 
-		/** \defgroup 65regs 6502 Registers
+		/** \defgroup module_registers 6502 Registers
 		 *
 		 * This is the set of registers available in the System65 CPU core.
+		 *
 		 * @{
 		 */
 		uint8_t a; //!< Accumulator
@@ -367,7 +370,7 @@ class System65
 		uint16_t pc; //!< Program counter
 		/** @} */
 
-		/** Processor flags */
+		/** Processor flags \see pf */
 		enum PFLAGS {
 			/** Carry flag
 			 *
@@ -430,7 +433,7 @@ class System65
 			PFLAG_N = 0x80
 		};
 
-		/** \defgroup addressmodes  Memory addressing modes
+		/** \defgroup module_addressmodes Memory addressing modes
 		 *
 		 * These methods translate input address data and mode and return the
 		 * actual address to read/write. Each specific opcode that reads from or
@@ -438,7 +441,7 @@ class System65
 		 * directly from the machine state.
 		 *
 		 * Unless otherwise noted, each function returns an \em index to the memory
-		 * array as a \c uint8_t, which can be treated as an absolute pointer in
+		 * array as a \c uint16_t, which can be treated as an absolute pointer in
 		 * memory.
 		 *
 		 * \note Each method returns 16-bit addresses in big-endian (MSB
@@ -581,13 +584,13 @@ class System65
 
 		/** Runs a single instruction.
 		 *
-		 * When executing, this function will update \ref m_CycleCount with the
-		 * new cycle count. When this function returns, it can immediately be
+		 * When executing, this function will update m_CycleCount with the new
+		 * cycle count. When this function returns, it can immediately be
 		 * called again to execute another instruction.
 		 */
 		void SYSTEM65CORE Dispatch(void);
 
-		/** \defgroup system65helpers Execution helper functions
+		/** \defgroup module_helpers Execution helper functions
 		 *
 		 * These functions perform various helper tasks for execution, such as
 		 * setting flags, transferring data, etc. When these functions are
@@ -716,7 +719,7 @@ class System65
 
 		/** @} */
 
-		/** \defgroup system65instructions CPU instructions
+		/** \defgroup module_instructions CPU instructions
 		 *
 		 * These functions perform the actual modification of machine state that
 		 * each instruction would normally do. Each reads the current byte at pc
@@ -1218,7 +1221,7 @@ class System65
 		/**
 		 * The <tt>BRK</tt> instruction forces the generation of an interrupt
 		 * request. <tt>PC</tt> and processor status are pushed on the stack,
-		 * then the IRQ interrupt vector at <tt>$FFFE/<tt>$FFFF</tt> is loaded
+		 * then the IRQ interrupt vector at <tt>$FFFE</tt>/<tt>$FFFF</tt> is loaded
 		 * into <tt>PC</tt> and the B flag in the status register is set to 1.
 		 *
 		 * Flags affected:

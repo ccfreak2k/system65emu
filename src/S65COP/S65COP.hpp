@@ -75,17 +75,6 @@ typedef enum {
 
 /** @} */
 
-/** \class S65COP
- * The System65 Coprocessor class.
- *
- * This class represents the System65 Coprocessor. The coprocessor is used for
- * multiply/divide as well as vector operations.
- *
- * The coprocessor works by mapping a page of memory as a command buffer. The
- * processor puts commands into the buffer, and the coprocessor executes them in
- * order.
- */
-
 /** \page workingdesc Coprocessor Description
  *
  * \section arch Coprocessor Architecture
@@ -129,6 +118,17 @@ typedef enum {
  * * Instruction orthogonality; allowing each instruction to have several
  * different ways of accepting data, much like 6502 instructions.
  * * Add a way to modify individual elements within each vector register.
+ */
+
+/** \class S65COP
+ * The System65 Coprocessor class.
+ *
+ * This class represents the System65 Coprocessor. The coprocessor is used for
+ * multiply/divide as well as vector operations.
+ *
+ * The coprocessor works by mapping a page of memory as a command buffer. The
+ * processor puts commands into the buffer, and the coprocessor executes them in
+ * order.
  */
 
 class S65COP

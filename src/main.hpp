@@ -42,37 +42,37 @@
  * a few different modules and C++ classes. These are good starting points,
  * depending on what it is that you want to know:
  *
- * * \ref System65 is the main class. It contains the full System65 emulation
+ * * System65 is the main class. It contains the full System65 emulation
  * context.
  *
  * * Within the System65 class are certain modules that have other potentially
  * useful pieces of information:
  *
- * * * The \ref regs "Registers" module describes each register and its use
+ * * * The \ref module_registers "Registers" module describes each register and its use
  * within the 6502.
  *
- * * * The \ref addressmodes "Memory Addressing Modes" module describes the
+ * * * The \ref module_addressmodes "Memory Addressing Modes" module describes the
  * various "address modes" used by each instruction.
  *
- * * * The \ref system65helpers "Execution Helper Functions" module describes
+ * * * The \ref module_helpers "Execution Helper Functions" module describes
  * the various helper functions used within the emulator.
  *
- * * * The \ref system65instructions "CPU Instructions" module contains a list
+ * * * The \ref module_instructions "CPU Instructions" module contains a list
  * and description of each supported CPU instruction.
  *
- * * \ref S65COP is the System65 vector co-processor subsystem. As with the
+ * * S65COP is the System65 vector co-processor subsystem. As with the
  * System65 class, this too is fully self-contained, with the exception of
  * relying on System65 to work.
  *
- * * * The \ref copinsnlist "Coprocessor Instruction Listing" module has a list
+ * * * The copinsnlist "Coprocessor Instruction Listing" module has a list
  * of each coprocessor instruction and their brief descriptions.
  *
- * * \ref SFMLContext contains functionality necessary to interface with SFML
+ * * SFMLContext contains functionality necessary to interface with SFML
  * for accepting input from the user and displaying things on the screen. While
  * it is self-contained, it currently isn't complete enough to decouple the main
  * code from this class without some retooling.
  *
- * * \ref SDLContext is much like SFMLContext, except it was used to interface
+ * * SDLContext is much like SFMLContext, except it was used to interface
  * with SDL. It is currently unused, and is included mostly for historic value,
  * although an SDL port may be useful if we ever port to an exotic architecture
  * that SFML doesn't support.
