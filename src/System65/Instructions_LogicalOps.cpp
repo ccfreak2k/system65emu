@@ -78,19 +78,19 @@ void SYSTEM65CORE System65::Insn_ORA(void)
 	case 0x09: // immediate
 		LOCAL_ORA(2,2,Addr_IMM()); break;
 	case 0x05: // zeropage
-		LOCAL_ORA(2,3,Addr_IMM()); break;
+		LOCAL_ORA(2,3,Addr_ZPG()); break;
 	case 0x15: // zeropage,x
-		LOCAL_ORA(2,4,Addr_IMM()); break;
+		LOCAL_ORA(2,4,Addr_ZPX()); break;
 	case 0x0d: // absolute
-		LOCAL_ORA(3,4,Addr_IMM()); break;
+		LOCAL_ORA(3,4,Addr_ABS()); break;
 	case 0x1d: // absolute,x
-		LOCAL_ORA(3,4,Addr_IMM()); break;
+		LOCAL_ORA(3,4,Addr_ABX()); break;
 	case 0x19: // absolute,y
-		LOCAL_ORA(3,4,Addr_IMM()); break;
+		LOCAL_ORA(3,4,Addr_ABY()); break;
 	case 0x01: // (indirect,x)
-		LOCAL_ORA(2,6,Addr_IMM()); break;
+		LOCAL_ORA(2,6,Addr_INX()); break;
 	case 0x11: // (indirect),y
-		LOCAL_ORA(2,5,Addr_IMM()); break;
+		LOCAL_ORA(2,5,Addr_INY()); break;
 	default:
 		INSN_DECODE_ERROR(); return;
 	}
