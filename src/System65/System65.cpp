@@ -501,12 +501,12 @@ void SYSTEM65CORE System65::Dispatch(void)
 		assert(oldcyclecount != m_CycleCount);
 		assert(oldpc != pc);
 	}
-	curcyclecount++;
-	if (curcyclecount == 1000000) {
+	curcyclecount += m_CycleCount - oldcyclecount;
+	if (curcyclecount >= 1000000) {
 		m_CStop = std::clock();
 		float time = 1000.0 * (m_CStop - m_CStart) / CLOCKS_PER_SEC;
-		std::cout << "1M insns retired in " << time << "ms (" << 1/time*1000 << "MHz)\n";
-		curcyclecount = 0;
+		std::cout << "1M cycles in " << time << "ms (" << 1/time*1000 << "MHz)\n";
+		curcyclecount -= 1000000;
 		start_clock = false;
 	}
 #endif // _DEBUG
