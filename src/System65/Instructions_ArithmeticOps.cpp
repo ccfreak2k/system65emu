@@ -11,7 +11,6 @@ void SYSTEM65CORE System65::Insn_ADC(void)
 #ifdef DEBUG_PRINT_INSTRUCTION
 	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
-	// Status: coding complete, needs testing
 	uint16_t val,nval;
 	switch(memory[pc]) {
 	case 0x69: // immediate
@@ -36,30 +35,27 @@ void SYSTEM65CORE System65::Insn_ADC(void)
 
 	if (Helper_GetFlag(System65::PFLAG_D) != 0) {
 		// BCD mode
-#ifdef _DEBUG
-		assert(false && "BCD not supported for ADC yet");
-#endif // _DEBUG
-		uint16_t vala = (a & 0x0f) + (val & 0x0f) + (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
-		if (vala > 9)
-			vala = ((vala + 6) & 0x0f) + 16;
+		uint16_t ba = ((a) >> 4)*10 + ((a) & 0x0F);
+		uint16_t bval = (((val) >> 4)*10) + ((val) & 0x0F);
 
-		uint16_t valb = (a & 0xf0) + (val & 0xf0) + vala;
-		if (valb > 160)
-			valb += 96;
+		nval = ba + bval + (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
+		HELPER_SETCLEARFLAG((nval > 99),System65::PFLAG_C);
+		if (nval > 99)
+			nval -= 100;
+		a = ((((nval)/10) % 10) << 4) | ((nval) % 10);
 
-		nval = (valb & 0xff);
-
-		Helper_SetClearC((valb > 100));
-		//HELPER_SETCLEARFLAG((valb > 100),System65::PFLAG_C);
-		Helper_ClearFlag(System65::PFLAG_V);
+		// V is valid in BCD (per the datasheets), however it's non-sensical
+		// since it's only used for signed math. Nonetheless, its behavior in
+		// BCD mode is covered here:
+		// http://www.6502.org/tutorials/vflag.html#b
+		// It's currently not touched here.
 	} else {
 		// Non-BCD mode
 		// Add w/ carry
 		nval = a + val + (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
 		HELPER_SETCLEARFLAG((nval&0xFF00),System65::PFLAG_C); // TODO: Check me for neg values
 		HELPER_SETCLEARFLAG((((a&0x80)==(val&0x80))&&((a&0x80)!=(nval&0x80))),System65::PFLAG_V);
-		HELPER_SETCLEARFLAG(((nval&0xFF)==0),System65::PFLAG_Z);
-		HELPER_SETCLEARFLAG((nval&0x80),System65::PFLAG_N);
+		a = (uint8_t)nval;
 
 		// Overflow occurs when the result is outside of the range -128 - 127.
 		// Here are some examples:
@@ -71,8 +67,8 @@ void SYSTEM65CORE System65::Insn_ADC(void)
 		// testadc.asm tests ADC and SBC to see if V handling is done correctly.
 	}
 
-	// write
-	a = (uint8_t)nval;
+	HELPER_SETCLEARFLAG(((a&0xFF)==0),System65::PFLAG_Z);
+	HELPER_SETCLEARFLAG((a&0x80),System65::PFLAG_N);
 }
 
 void SYSTEM65CORE System65::Insn_SBC(void)
@@ -80,7 +76,6 @@ void SYSTEM65CORE System65::Insn_SBC(void)
 #ifdef DEBUG_PRINT_INSTRUCTION
 	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
-	// TODO: BCD mode subtract
 	uint16_t val,nval;
 	switch(memory[pc]) {
 	case 0xe9: // immediate
@@ -104,16 +99,20 @@ void SYSTEM65CORE System65::Insn_SBC(void)
 	}
 
 	if (Helper_GetFlag(System65::PFLAG_D) != 0) {
-#ifdef _DEBUG
-		assert(false && "BCD not supported for SBC yet");
-#endif // _DEBUG
+		uint16_t ba = ((a) >> 4)*10 + ((a) & 0x0F);
+		uint16_t bval = (((val) >> 4)*10) + ((val) & 0x0F);
+
+		nval = ba - bval - (Helper_GetFlag(System65::PFLAG_C) ? 0 : 1);
+		HELPER_SETCLEARFLAG((nval < 0x64),System65::PFLAG_C); // FIXME: Make sure this is correct
+		if (nval > 0x63)
+			nval += 100;
+		a = ((((nval)/10) % 10) << 4) | ((nval) % 10);
 	} else {
 		// subtract w/ carry
 		nval = a - val - (Helper_GetFlag(System65::PFLAG_C) ? 0 : 1);
 		HELPER_SETCLEARFLAG(!(nval&0xFF00),System65::PFLAG_C); // TODO: check me
 		HELPER_SETCLEARFLAG((((a&0x80)!=(val&0x80))&&((a&0x80)!=(nval&0x80))),System65::PFLAG_V);
-		HELPER_SETCLEARFLAG(((nval&0xFF)==0),System65::PFLAG_Z);
-		HELPER_SETCLEARFLAG((nval&0x80),System65::PFLAG_N);
+		a = (uint8_t)nval;
 
 		// Overflow occurs when the result is outside of the range -128 - 127.
 		// Here are some examples:
@@ -124,8 +123,8 @@ void SYSTEM65CORE System65::Insn_SBC(void)
 		// testadc.asm tests ADC and SBC to see if V handling is done correctly.
 	}
 
-	// write
-	a = (uint8_t)nval;
+	HELPER_SETCLEARFLAG(((a&0xFF)==0),System65::PFLAG_Z);
+	HELPER_SETCLEARFLAG((a&0x80),System65::PFLAG_N);
 }
 
 void SYSTEM65CORE System65::Insn_CMP(void)
