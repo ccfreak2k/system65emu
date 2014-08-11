@@ -22,3 +22,15 @@ can run these two steps to generate a suitable binary:
 	ld65 -t none -m adctest.map -o adctest.bin adctest.o
 
 The emulator will automatically locate the program to 0x0200 in memory.
+
+For emulator validation, "6502_functional_test.a65" and
+"6502_functional_test_new.a65" are used for testing. To run them, you'll need
+as65, found here: http://www.kingswood-consulting.co.uk/assemblers/
+Then assemble the .a65 file(s) with this command (ignore the command in the
+assembly file itself):
+
+	as65 -l -m -w -h0 6502_functional_test_new.a65
+
+This will produce a listing file (.lst), which you can use to track the
+execution, and a program file (.bin) which is to be loaded in the emulator, as
+above.
