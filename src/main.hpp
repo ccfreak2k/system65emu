@@ -1,6 +1,11 @@
 #ifndef MAIN_HPP
 #define MAIN_HPP
 
+// yaml_cpp needs this
+#ifdef _MSC_VER
+	#define _SCL_SECURE_NO_WARNINGS
+#endif // _MSC_VER
+
 // Standard libs
 #ifdef WIN32
 	#define WIN32_LEAN_AND_MEAN

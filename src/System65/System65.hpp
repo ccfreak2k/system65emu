@@ -1,6 +1,11 @@
 #ifndef SYSTEM65_HPP
 #define SYSTEM65_HPP
 
+// yaml_cpp needs this
+#ifdef _MSC_VER
+	#define _SCL_SECURE_NO_WARNINGS
+#endif // _MSC_VER
+
 // Standard libs
 #include <assert.h>
 #include <stdint.h>
@@ -10,10 +15,13 @@
 #include <atomic>
 #include <chrono>
 #include <ctime>
+#include <iomanip>
 #include <iostream>
+#include <fstream>
 
 // Class-related libs
 #include <SFML/System/Mutex.hpp>
+#include <yaml-cpp/yaml.h>
 
 /** \file System65.hpp
  * Interface for the \ref System65 class.
@@ -120,6 +128,9 @@
  *
  * \todo Handle the case where a second NMI is generated when one is already
  * being serviced. Do we stall it? Find some way to stack them? Mask it out?
+ *
+ * \todo General interrupt overhaul is needed, mostly to make sure each
+ * interrupt can be serviced.
  *
  * \nosubgrouping
  */
@@ -280,6 +291,25 @@ class System65
 		 */
 		void SetInterruptVector(uint16_t ivec);
 
+		/** Begins recording the machine state to a trace file.
+		 *
+		 * The trace will record up to <tt>instructioncount</tt> number of
+		 * "frames" of trace data. If you are unsure of how many frames you'll need,
+		 * you can leave the number parameter out and call EndRecordTrace() when
+		 * you finish.
+		 *
+		 * \param[in] filename Path to the file to record the trace to; an empty
+		 * filename will return immediately.
+		 * \param[in] instructioncount Number of instructions to record to the
+		 * trace file; a value of 0 will return without creating a trace file.
+		 */
+		void StartRecordTrace(std::string filename, unsigned int instructioncount = UINT_MAX);
+
+		/** Ends a currently-recording trace.
+		 *
+		 */
+		void EndRecordTrace(void);
+
 		/** Resets the cycle counter. */
 		void ResetCycleCount(void) { m_CycleCount = 0; }
 
@@ -322,14 +352,22 @@ class System65
 		 */
 		void Reset(void);
 
+		/** Returns whether a trace is currently running
+		 *
+		 * \return Whether a trace is currently running
+		 */
+		bool IsTraceRunning(void);
+
 		uint8_t *memory; //!< Pointer to system memory for this system
 		unsigned int memorysize; //!< Size of memory for this system.
 
 	protected:
 	private:
 		unsigned int m_CycleCount; //!< Tracks the number of cycles executed so far.
-
 		unsigned int m_InstructionCount; //!< Tracks the number of instructions retired (executed) so far.
+
+		YAML::Emitter *m_Trace; //!< YAML emitter for the trace file
+		unsigned int m_TraceFrameCount; //!< How many frames are in the current trace
 
 		std::clock_t m_CStart; //!< Starting clock for measuing execution speed
 		std::clock_t m_CStop; //!< Ending clock for measuring execution speed
@@ -432,6 +470,28 @@ class System65
 			 */
 			PFLAG_N = 0x80
 		};
+
+		std::string m_TraceFilename; //!< Filename for the trace file to be written/read
+
+		/** Records a frame of execution.
+		 *
+		 * This method should be called before execution begins.
+		 *
+		 * \param[in] frameNumber The current instruction count
+		 * \param[in] oldMemory Memory state from the last frame, after
+		 * execution; if this is null, the entire current memory state will be
+		 * stored
+		 * \param[in] newMemory Memory state from the current frame, after execution
+		 */
+		void RecordFrame(unsigned int frameNumber, uint8_t oldMemory[0x10000], uint8_t newMemory[0x10000]);
+
+		/** Runs a single instruction.
+		 *
+		 * When executing, this function will update m_CycleCount with the new
+		 * cycle count. When this function returns, it can immediately be
+		 * called again to execute another instruction.
+		 */
+		void SYSTEM65CORE Dispatch(void);
 
 		/** \defgroup module_addressmodes Memory addressing modes
 		 *
@@ -581,14 +641,6 @@ class System65
 		 */
 		uint8_t SYSTEM65CORE Addr_ZPY(void); //!< Zeropage, Y-indexed (<tt>$0000</tt> + <tt>Y</tt>)
 		/** @} */
-
-		/** Runs a single instruction.
-		 *
-		 * When executing, this function will update m_CycleCount with the new
-		 * cycle count. When this function returns, it can immediately be
-		 * called again to execute another instruction.
-		 */
-		void SYSTEM65CORE Dispatch(void);
 
 		/** \defgroup module_helpers Execution helper functions
 		 *

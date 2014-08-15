@@ -16,7 +16,9 @@ System65::System65(unsigned int memsize) :
 	y(0x00),
 	pf(System65::PFLAG_R|System65::PFLAG_I),
 	s(0xFD),
-	pc(CODE_BASE)
+	pc(CODE_BASE),
+	m_Trace(nullptr),
+	m_TraceFrameCount(0)
 {
 	// Basic bounds checking
 	if (memsize > 0x10000)

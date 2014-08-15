@@ -1,0 +1,83 @@
+Trace files are divided into "frames," which is each point just before the next
+instruction is fetched (i.e. right when System65::Dispatch() starts. The frame
+number should coincide with the instruction count.
+
+A trace does not need to record every consecutive frame; conversely, a playback
+doesn't need to check every consecutive frame. A dynarec, for example, may only
+be able to record or check a frame after executing a batch of instructions.
+
+The trace is only concerned with the "external" effects of each frame, i.e.
+it only records anything that a 6502 program could potentially record itself.
+
+Public interface:
+
+RecordTrace(filename, cycle count)
+
+Starts a new trace file, recording up to (cycle count) instructions before 
+losing
+
+PlayTrace(filename, cycle count)
+
+Plays back a trace file. cycle count specifies the maximum instruction count to
+trace before stopping. A value of 0 means it will play back until the end of the
+trace file.
+
+StopTrace()
+
+Stops a currently-running trace
+
+Private interface
+
+bTraceEnabled - enable tracing
+iCycleLimit - Which cycle will the last frame be recorded on. A value of 0 or
+less than the current instruction count will disable tracing.
+
+RecordFrame(cycle number)
+
+Records a frame of execution; should be called before execution starts.
+
+File format:
+
+Frame Number
+     |
+     +--- Register State
+     |
+     +--- Memory Delta
+     |
+     +--- Interrupt
+
+Frame Number: The number of instructions retired, starting from 0
+
+Register State: A snapshot of the state of each register in the CPU
+
+Memory Delta: Which cells of memory have changed from the last frame. The format
+should be as follows:
+
+Interrupt: What interrupt(s) should trigger. The effects of the interrupt happen
+in the next frame. Multiple interrupts firing on the same frame is currently
+undefined.
+
+frame 0
+	a: 0
+	x: 0
+	y: 0
+	s: 0
+	pc: 0
+	memory
+		0x0000: 00
+		0x0001: 00
+		...
+
+frame 1:
+	a: 1
+	memory
+		0x8000: FF
+	interrupt
+		irq
+
+binary format idea:
+
+frame count
+frame number
+0x00: bitfield representing registers that have changed
+list of registers that have changed, in order
