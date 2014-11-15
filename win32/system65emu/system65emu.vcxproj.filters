@@ -25,6 +25,12 @@
     <Filter Include="Source Files\S65COP">
       <UniqueIdentifier>{5e779cfe-1d1f-47db-865d-6a65588eff96}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\System65Silt">
+      <UniqueIdentifier>{97cd213c-5801-452d-aba2-fb53f945e4e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\System65Silt">
+      <UniqueIdentifier>{277c551d-5438-47c2-8445-c15e587fae94}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\main.hpp">
@@ -38,6 +44,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\S65COP\S65COP.hpp">
       <Filter>Header Files\S65COP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\System65Silt\System65Silt.hpp">
+      <Filter>Header Files\System65Silt</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -94,6 +103,24 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Trace.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\System65Silt\System65Silt.cpp">
+      <Filter>Source Files\System65Silt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\System65Silt\Silt_Helpers.cpp">
+      <Filter>Source Files\System65Silt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\System65Silt\Silt_Instructions_Arithmetic.cpp">
+      <Filter>Source Files\System65Silt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\System65Silt\Silt_Instructions_JumpsCalls.cpp">
+      <Filter>Source Files\System65Silt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\System65Silt\Silt_Instructions_LoadStore.cpp">
+      <Filter>Source Files\System65Silt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\System65Silt\Silt_Instructions_System.cpp">
+      <Filter>Source Files\System65Silt</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
