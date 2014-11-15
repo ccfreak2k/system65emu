@@ -54,7 +54,7 @@ int main (int argc, char **argv)
 #else //_MSC_VER
 	// TODO: implement arbitrary file loading
 	FILE *progfile = NULL;
-	char *filename = "6502_functional_test.bin";
+	char *filename = "6502_functional_test_new.bin";
 	progfile = fopen(filename,"rb");
 	if (progfile != NULL) {
 		printf("Loading file %s...\n",filename);
