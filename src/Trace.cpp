@@ -54,14 +54,11 @@ void System65::RecordFrame(unsigned int frameNumber, uint8_t oldMemory[0x10000],
 		*m_Trace << YAML::Key << "pc" << YAML::Value << pc;
 
 		*m_Trace << YAML::Key << "memory" << YAML::Value << YAML::BeginMap;
+		// If there is no oldMemory[] then write all of the memory values
 		for (unsigned int i = 0; i > 0x10000; i++) {
 			if (oldMemory != NULL) {
-				if (oldMemory[i] != newMemory[i]) {
-					*m_Trace << YAML::Key << i << YAML::BeginMap;
-						*m_Trace << YAML::Key << "old" << YAML::Value << oldMemory[i];
-						*m_Trace << YAML::Key << "new" << YAML::Value << newMemory[i];
-					*m_Trace << YAML::EndMap;
-				}
+				if (oldMemory[i] != newMemory[i])
+					*m_Trace << YAML::Key << i << YAML::Value << newMemory[i];
 			} else
 				*m_Trace << YAML::Key << i << YAML::Value << newMemory[i];
 		}

@@ -303,7 +303,7 @@ class System65
 		 * \param[in] instructioncount Number of instructions to record to the
 		 * trace file; a value of 0 will return without creating a trace file.
 		 */
-		void StartRecordTrace(std::string filename, unsigned int instructioncount = UINT_MAX);
+		void StartRecordTrace(std::string filename = "trace.yml", unsigned int instructioncount = UINT_MAX);
 
 		/** Ends a currently-recording trace.
 		 *
