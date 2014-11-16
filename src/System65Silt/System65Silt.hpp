@@ -488,6 +488,9 @@ private:
 	int i_jmpabs(const uint8_t *&in, uint8_t *&out, int &count, bool &stop);
 	int i_jmpind(const uint8_t *&in, uint8_t *&out, int &count, bool &stop);
 
+	// JSR
+	int i_jsrabs(const uint8_t *&in, uint8_t *&out, int &count, bool &stop);
+
 	// LDA
 	int i_ldaimm(const uint8_t *&in, uint8_t *&out, int &count, bool &stop);
 	int i_ldazpg(const uint8_t *&in, uint8_t *&out, int &count, bool &stop);
