@@ -506,7 +506,7 @@ void SYSTEM65CORE System65::Dispatch(void)
 	curcyclecount += m_CycleCount - oldcyclecount;
 	if (curcyclecount >= 1000000) {
 		m_CStop = std::clock();
-		float time = 1000.0 * (m_CStop - m_CStart) / CLOCKS_PER_SEC;
+		float time = 1000.0f * (m_CStop - m_CStart) / CLOCKS_PER_SEC;
 		std::cout << "1M cycles in " << time << "ms (" << 1/time*1000 << "MHz)\n";
 		curcyclecount -= 1000000;
 		start_clock = false;
