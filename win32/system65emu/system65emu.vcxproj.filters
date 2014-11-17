@@ -48,6 +48,9 @@
     <ClInclude Include="..\..\src\System65Silt\System65Silt.hpp">
       <Filter>Header Files\System65Silt</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\System65Silt\Silt_AsmHelpers.h">
+      <Filter>Header Files\System65Silt</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\S65COP\S65COP.cpp">
@@ -122,5 +125,13 @@
     <ClCompile Include="..\..\src\System65Silt\Silt_Instructions_System.cpp">
       <Filter>Source Files\System65Silt</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\System65Silt\Silt_AddressModes.cpp">
+      <Filter>Source Files\System65Silt</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="..\..\src\System65Silt\Silt_AsmHelpers.asm">
+      <Filter>Source Files\System65Silt</Filter>
+    </MASM>
   </ItemGroup>
 </Project>

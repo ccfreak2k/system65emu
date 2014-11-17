@@ -11,6 +11,9 @@
 #include <map>
 #include <string>
 
+// Project headers
+#include "Silt_AsmHelpers.h"
+
 /** \file System65Silt.hpp
  * Interface for the \ref System65Silt class.
  */
@@ -279,7 +282,8 @@ private:
 
 	uint8_t *m_Memory; //!< Pointer to system memory for this system
 
-	uint16_t m_StackBase; //!< Address that the stack is based at.
+	uint16_t m_StackBase; //!< Address that the stack is based at in internal memory
+	uint8_t *m_EffectiveStackBase; //!< Address that the stack is based at in real memory
 
 	typedef std::map<uint16_t, NativeCode> CacheMap; //!< Typedef for the native code cache map
 	CacheMap m_Cache; //!< The native code cache map declaration
@@ -490,6 +494,9 @@ private:
 
 	// JSR
 	int i_jsrabs(const uint8_t *&in, uint8_t *&out, int &count, bool &stop);
+
+	// RTS
+	int i_rts(const uint8_t *&in, uint8_t *&out, int &count, bool &stop);
 
 	// LDA
 	int i_ldaimm(const uint8_t *&in, uint8_t *&out, int &count, bool &stop);

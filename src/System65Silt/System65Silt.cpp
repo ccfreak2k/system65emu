@@ -21,6 +21,8 @@ System65Silt::System65Silt(unsigned int memsize, uint8_t stackbase)
 	memset(&m_Register, 0, sizeof(m_Register)); // maybe superfluous
 
 	m_StackBase = stackbase << 8;
+	m_EffectiveStackBase = m_Memory+m_StackBase;
+	siltasm_init(m_Memory,m_EffectiveStackBase);
 }
 
 System65Silt::~System65Silt()
@@ -138,6 +140,7 @@ void System65Silt::Execute(const NativeCode *code)
 
 		// Load the VM state
 		mov edx, state
+		mov di, [edx]Registers.pc
 		mov al, [edx]Registers.a
 		mov ah, [edx]Registers.s
 		mov bl, [edx]Registers.x

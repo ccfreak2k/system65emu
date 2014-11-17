@@ -94,6 +94,8 @@ int System65Silt::i_ldyimm(const uint8_t *&in, uint8_t *&out, int &count, bool &
 		*out++ = 0xB7; // mov bh,imm
 		*out++ = in[1]; // <imm>
 	}
+
+	return 0;
 }
 
 //------------------------------------------------------------------------------
@@ -111,6 +113,8 @@ int System65Silt::i_staabs(const uint8_t *&in, uint8_t *&out, int &count, bool &
 		*out++ = 0x88; // mov [esi],al
 		*out++ = 0x06;
 	}
+
+	return 0;
 }
 
 int System65Silt::i_staabx(const uint8_t *&in, uint8_t *&out, int &count, bool &stop)
