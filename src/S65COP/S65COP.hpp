@@ -68,9 +68,8 @@ typedef enum {
 	DIV = 0x3D, //!< Divide VX by IX; the result is kept in VX.
 	DVV = 0x3E, //!< Divide VX by VY; the result is stored in VX.
 	/* Vector ops */
-	DOT = 0x40, //!< Dot product of VX and VY; the result is stored in VX.
-	CRS = 0x41, //!< Cross product of VX and VY; the result is stored in VX.
-	MID = 0x42, //!< The midpoint between VX and VY; the result is stored in VX.
+	MID = 0x40 //!< The midpoint between VX and VY; the result is stored in VX.
+	LRP = 0x41 //!< Linear interpolation from VX to VY; the result is stored in VX.
 } Opcode;
 
 /** @} */
