@@ -19,7 +19,8 @@ void SYSTEM65CORE System65::Helper_Set_ZN_Flags(uint8_t reg)
 
 void SYSTEM65CORE System65::Helper_Push(uint8_t val)
 {
-	memory[m_StackBase+s] = val;
+	//memory[m_StackBase+s] = val;
+	Memory_Write(m_StackBase + s, val);
 	s--;
 }
 
@@ -32,8 +33,8 @@ void SYSTEM65CORE System65::Helper_Push(uint16_t val)
 uint8_t SYSTEM65CORE System65::Helper_PopByte(void)
 {
 	s++;
-	uint8_t val = memory[m_StackBase+s];
-	return val;
+	//uint8_t val = memory[m_StackBase+s];
+	return Memory_Read(m_StackBase + s);
 }
 
 uint16_t SYSTEM65CORE System65::Helper_PopWord(void)
@@ -51,31 +52,33 @@ void SYSTEM65CORE System65::Helper_SetBranch(bool branch)
 		// on a real 6502, pc is incremented after instruction fetching
 		// and blah whatever so we have to add two bytes to the relative jump
 		// destination for it to work right.
-		pc += (int8_t)memory[pc+1];
+		//pc += (int8_t)memory[pc+1];
+		pc += (int8_t)Memory_Read(pc + 1);
 	}
 	pc += 2;
 }
 
-uint8_t SYSTEM65CORE System65::Helper_PeekByte(uint16_t addr)
-{
-	return memory[addr];
-}
+// The following four methods are deprecated unless the need for them arises.
+//uint8_t SYSTEM65CORE System65::Helper_PeekByte(uint16_t addr)
+//{
+//	return memory[addr];
+//}
 
-uint16_t SYSTEM65CORE System65::Helper_PeekWord(uint16_t addr)
-{
-	return memory[addr] + (memory[addr+1] << 8);
-}
+//uint16_t SYSTEM65CORE System65::Helper_PeekWord(uint16_t addr)
+//{
+//	return memory[addr] + (memory[addr+1] << 8);
+//}
 
-void SYSTEM65CORE System65::Helper_Poke(uint16_t addr, uint8_t val)
-{
-	memory[addr] = val;
-}
+//void SYSTEM65CORE System65::Helper_Poke(uint16_t addr, uint8_t val)
+//{
+//	memory[addr] = val;
+//}
 
-void SYSTEM65CORE System65::Helper_Poke(uint16_t addr, uint16_t val)
-{
-	memory[addr] = val & 0xFF;
-	memory[addr+1] = (val >> 8);
-}
+//void SYSTEM65CORE System65::Helper_Poke(uint16_t addr, uint16_t val)
+//{
+//	memory[addr] = val & 0xFF;
+//	memory[addr+1] = (val >> 8);
+//}
 
 void SYSTEM65CORE System65::Helper_SetFlag(System65::PFLAGS flag)
 {
@@ -151,7 +154,7 @@ bool SYSTEM65CORE System65::Helper_HandleInterrupt(void)
 	Helper_Push(m_BreakFlagSet ? (uint16_t)(pc+2) : pc);
 	Helper_Push((uint8_t)(pf | (m_BreakFlagSet ? System65::PFLAG_B : 0x00)));
 	Helper_SetFlag(System65::PFLAG_I);
-	pc = Helper_PeekWord(m_InterruptVector);
+	pc = Memory_ReadWord(m_InterruptVector);
 	m_CycleCount += 7;
 	return true;
 }

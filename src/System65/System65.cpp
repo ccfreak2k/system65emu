@@ -68,7 +68,7 @@ void System65::Reset(void)
 {
 	Helper_SetFlag(System65::PFLAG_I);
 	Helper_ClearFlag(System65::PFLAG_D);
-	pc = Helper_PeekWord(0xFFFC);
+	pc = Memory_ReadWord(0xFFFC);
 	s = 0xFD;
 }
 
@@ -100,7 +100,7 @@ void System65::SetStackBasePage(uint8_t base)
 
 void System65::SetInterruptVector(uint16_t ivec)
 {
-	Helper_Poke(0xFFFE,ivec);
+	Memory_Write(0xFFFE,ivec);
 }
 
 //------------------------------------------------------------------------------
@@ -130,7 +130,7 @@ void SYSTEM65CORE System65::Dispatch(void)
 		// Yes, a giant switch table. I know that it's a naive way to implement
 		// this; however, it also serves as a good reference implementation, since
 		// opcodes can be sorted arbitrarily; here I group them by function.
-		switch (memory[pc]) {
+		switch (Memory_Read(pc)) {
 		// ===========
 		// LOAD/STORE
 		// ===========
@@ -491,7 +491,7 @@ void SYSTEM65CORE System65::Dispatch(void)
 			break;
 
 		default:
-			printf("Unhandled opcode 0x%.2X @ $%.4X\n",memory[pc],pc);
+			printf("Unhandled opcode 0x%.2X @ $%.4X\n",Memory_Read(pc),pc);
 			m_InstructionCount--;
 		}
 

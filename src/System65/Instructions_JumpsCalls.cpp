@@ -8,14 +8,14 @@ void SYSTEM65CORE System65::Insn_JMP(void)
 #ifdef DEBUG_PRINT_INSTRUCTION
 	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
-	switch (memory[pc]) {
+	switch (Memory_Read(pc)) {
 	case 0x4c: // absolute
 		m_CycleCount += 3;
 		pc = Addr_ABS();
 		break;
 	case 0x6c: // indirect
 		m_CycleCount += 5;
-		pc = Helper_PeekWord(Addr_IND());
+		pc = Addr_IND();
 		break;
 	default:
 		INSN_DECODE_ERROR(); break;

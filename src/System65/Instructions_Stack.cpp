@@ -63,8 +63,8 @@ void SYSTEM65CORE System65::Insn_PLA(void)
 #endif // _DEBUG
 	m_CycleCount += 4;
 	a = Helper_PopByte();
-	HELPER_SETCLEARFLAG((a == 0),System65::PFLAG_Z);
-	HELPER_SETCLEARFLAG((a>0x7F),System65::PFLAG_N);
+	Helper_SetClear(System65::PFLAG_Z, (a == 0));
+	Helper_SetClear(System65::PFLAG_N, (a > 0x7f));
 	pc += 1;
 }
 
@@ -79,9 +79,6 @@ void SYSTEM65CORE System65::Insn_PLP(void)
 	m_CycleCount += 4;
 	pf = Helper_PopByte();
 	Helper_SetFlag(System65::PFLAG_R);
-	if (m_BreakFlagSet)
-		Helper_SetFlag(System65::PFLAG_B);
-	else
-		Helper_ClearFlag(System65::PFLAG_B);
+	Helper_SetClear(System65::PFLAG_B, m_BreakFlagSet);
 	pc += 1;
 }

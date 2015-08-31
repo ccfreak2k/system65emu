@@ -12,7 +12,7 @@ void SYSTEM65CORE System65::Insn_INC(void)
 	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
 	uint16_t addr;
-	switch(memory[pc]) {
+	switch (Memory_Read(pc)) {
 	case 0xe6: // zeropage
 		LOCAL_LOADADDR(2,5,Addr_ZPG()); break;
 	case 0xf6: // zeropage,x
@@ -25,9 +25,11 @@ void SYSTEM65CORE System65::Insn_INC(void)
 		INSN_DECODE_ERROR(); return;
 	}
 
-	memory[addr]++;
+	uint8_t val = Memory_Read(addr) + 1;
 
-	Helper_Set_ZN_Flags(memory[addr]);
+	Memory_Write(addr,val);
+
+	Helper_Set_ZN_Flags(val);
 }
 
 #define LOCAL_INCR(isize,ccount,reg) \
@@ -64,7 +66,7 @@ void SYSTEM65CORE System65::Insn_DEC(void)
 	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
 	uint16_t addr;
-	switch(memory[pc]) {
+	switch (Memory_Read(pc)) {
 	case 0xc6: // zeropage
 		LOCAL_LOADADDR(2,5,Addr_ZPG()); break;
 	case 0xd6: // zeropage,x
@@ -77,9 +79,11 @@ void SYSTEM65CORE System65::Insn_DEC(void)
 		INSN_DECODE_ERROR(); return;
 	}
 
-	memory[addr]--;
+	uint8_t val = Memory_Read(addr) - 1;
 
-	Helper_Set_ZN_Flags(memory[addr]);
+	Memory_Write(addr, val);
+
+	Helper_Set_ZN_Flags(val);
 }
 #undef LOCAL_LOADADDR
 
