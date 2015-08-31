@@ -109,7 +109,7 @@ report = 0
 ;RAM integrity test option. Checks for undesired RAM writes.
 ;set lowest non RAM or RAM mirror address page (-1=disable, 0=64k, $40=16k)
 ;leave disabled if a monitor, OS or background interrupt is allowed to alter RAM
-ram_top = -1
+ram_top = 0
 
         noopt       ;do not take shortcuts
 
