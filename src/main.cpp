@@ -145,11 +145,17 @@ int main (int argc, char **argv)
 void SystemExec(void) {
 	for (;;) {
 		if (bStopExec)
-			return;
+			break;
 
 		if (mutMachineState.try_lock()) {
+			// commented stuff is to make it run at 1MHz, roughly.
+			//clock_t start = std::clock();
+			//sys.Tick(100000);
 			sys.Tick();
+			//clock_t stop = std::clock();
 			mutMachineState.unlock();
+			//clock_t total = (stop - start);
+			//std::this_thread::sleep_for(std::chrono::milliseconds(total < 100 ? (100-total) : 0));
 		}
 	}
 }
