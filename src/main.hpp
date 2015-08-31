@@ -104,18 +104,18 @@
 //|                                                                                | 0007  00        brk         | 10
 //|                                                                                | 0008  00        brk         | 11
 //|                                                                                |>0009  00        brk         | 12
-//|                                                                                | 0010  00        brk         | 13
-//|                                                                                | 0011  00        brk         | 14
-//|                                                                                | 0012  00        brk         | 15
-//|                                                                                | 0013  00        brk         | 16
-//|                                                                                | 0014  00        brk         | 17
-//|                                                                                | 0015  00        brk         | 18
-//|                                                                                | 0016  00        brk         | 19
-//|                                                                                | 0017  00        brk         | 20
-//|                                                                                | 0018  00        brk         | 21
-//|                                                                                | 0019  00        brk         | 22
-//|                                                                                | 0020  00        brk         | 23
-//|                                                                                | 0021  00        brk         | 24
+//|                                                                                | 000a  00        brk         | 13
+//|                                                                                | 000b  00        brk         | 14
+//|                                                                                | 000c  00        brk         | 15
+//|                                                                                | 000d  00        brk         | 16
+//|                                                                                | 000e  00        brk         | 17
+//|                                                                                | 000f  00        brk         | 18
+//|                                                                                | 0010  00        brk         | 19
+//|                                                                                | 0011  00        brk         | 20
+//|                                                                                | 0012  00        brk         | 21
+//|                                                                                | 0013  00        brk         | 22
+//|                                                                                | 0014  00        brk         | 23
+//|                                                                                | 0015  00        brk         | 24
 //|                                                                                |                             | 25
 //+--------------------------------------------------------------------------------+-----------------------------+ 26
 //| Status line                                                                                                  | 27
@@ -139,7 +139,7 @@
 #define EMUSCREEN_WIDTH 112 //!< Width of the entire emulator screen, in characters/columns
 #define EMUSCREEN_HEIGHT 29 //!< Height of the entire emulator screen, in characters/rows
 
-System65 sys; //!< Object for the VM itself
+System65 sys(0x10000); //!< Object for the VM itself
 
 std::atomic<bool> bStopExec = false; //!< Whether the VM should stop running; the thread will terminate
 
