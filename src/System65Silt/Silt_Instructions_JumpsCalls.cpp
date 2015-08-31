@@ -19,7 +19,7 @@ int System65Silt::i_jmpabs(const uint8_t *&in, uint8_t *&out, int &count, bool &
 int System65Silt::i_jmpind(const uint8_t *&in, uint8_t *&out, int &count, bool &stop)
 {
 	if (out != NULL) {
-		// Strategy: get internal 16-bit ptr, sign-extend to 32-bit, add
+		// Strategy: get internal 16-bit ptr, zero-extend to 32-bit, add
 		// m_Memory ptr for effective address, and use the address as a ptr to the
 		// ultimate jump target (to load into DI).
 		uint16_t offs = MAKEWORD(in[1],in[2]); // "internal" pointer to jump target

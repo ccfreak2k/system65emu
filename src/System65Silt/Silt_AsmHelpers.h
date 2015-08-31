@@ -1,13 +1,16 @@
-#ifndef SILT_ASMHELPERS_CPP
-#define SILT_ASMHELPERS_CPP
+#ifndef SILT_ASMHELPERS_H
+#define SILT_ASMHELPERS_H
 #include <stdint.h>
 
-/** \file Silt_AsmHelpers.hpp
+/** \file Silt_AsmHelpers.h
  * A collection of helpers for Silt native execution.
  *
  * Certain basic actions are repeated during native execution, notably stack
  * manipulation. Instead of emitting such code over and over, helpers are called
  * from here to assist in these operations.
+ *
+ * These methods are different from the other set of helpers in the System65Silt
+ * class, which are used to modify the VM state outside of the VM's execution.
  */
 
 #ifdef __cplusplus
@@ -51,20 +54,26 @@ extern uint8_t *helper_push16_code;
  */
 void siltasm_init(uint8_t* memory, uint8_t* stack);
 
+/** Pushes a 16-bit value to the VM stack. */
 void siltasm_push16(void);
 
+/** Pushes an 8-bit valur to the VM stack. */
 void siltasm_push8(void);
 
+/** Pushes IP to the VM stack. */
 void siltasm_puship(void);
 
+/** Pops a 16-bit value off the VM stack. */
 void siltasm_pop16(void);
 
+/** Pops an 8-bit value off the VM stack. */
 void siltasm_pop8(void);
 
+/** Pops IP off the VM stack. */
 void siltasm_popip(void);
 
 #ifdef __cplusplus
 }
 #endif // __cplusplus
 
-#endif // SILT_ASMHELPERS_CPP
+#endif // SILT_ASMHELPERS_H
