@@ -7,7 +7,7 @@ void SYSTEM65CORE System65::Insn_LDA(void)
 #ifdef DEBUG_PRINT_INSTRUCTION
 	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
-	switch (memory[pc]) {
+	switch (Memory_Read(pc)) {
 	case 0xa9: // immediate
 		INSN_M_TO_R(2,2,a,Addr_IMM()); break;
 	case 0xa5: // zeropage
@@ -36,7 +36,7 @@ void SYSTEM65CORE System65::Insn_LDX(void)
 #ifdef DEBUG_PRINT_INSTRUCTION
 	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
-	switch (memory[pc]) {
+	switch (Memory_Read(pc)) {
 	case 0xa2: // immediate
 		INSN_M_TO_R(2,2,x,Addr_IMM()); break;
 	case 0xa6: // zeropage
@@ -59,7 +59,7 @@ void SYSTEM65CORE System65::Insn_LDY(void)
 #ifdef DEBUG_PRINT_INSTRUCTION
 	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
-	switch (memory[pc]) {
+	switch (Memory_Read(pc)) {
 	case 0xa0: // immediate
 		INSN_M_TO_R(2,2,y,Addr_IMM()); break;
 	case 0xa4: // zeropage
@@ -82,7 +82,7 @@ void SYSTEM65CORE System65::Insn_STA(void)
 #ifdef DEBUG_PRINT_INSTRUCTION
 	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
-	switch(memory[pc]) {
+	switch (Memory_Read(pc)) {
 	case 0x85: // zeropage
 		INSN_R_TO_M(2,3,a,Addr_ZPG()); break;
 	case 0x95: // zeropage,x
@@ -107,7 +107,7 @@ void SYSTEM65CORE System65::Insn_STX(void)
 #ifdef DEBUG_PRINT_INSTRUCTION
 	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
-	switch (memory[pc]) {
+	switch (Memory_Read(pc)) {
 	case 0x86: // zeropage
 		INSN_R_TO_M(2,3,x,Addr_ZPG()); break;
 	case 0x96: // zeropage,y
@@ -124,7 +124,7 @@ void SYSTEM65CORE System65::Insn_STY(void)
 #ifdef DEBUG_PRINT_INSTRUCTION
 	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
-	switch (memory[pc]) {
+	switch (Memory_Read(pc)) {
 	case 0x84: // zeropage
 		INSN_R_TO_M(2,3,y,Addr_ZPG()); break;
 	case 0x94: // zeropage,x

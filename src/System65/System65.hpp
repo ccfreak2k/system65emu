@@ -38,18 +38,18 @@
 #define CODE_BASE 0x0200 //!< Base address for code
 
 /** Function macro to assert the correct decoding of an instruction */
-#define ASSERT_INSN(byte) assert(memory[pc] == byte)
+#define ASSERT_INSN(byte) assert((Memory_Read(pc) == byte) && "Instruction incorrectly decoded, check memory access")
 
 /** Function macro for writing a value from a register to memory */
 #define INSN_R_TO_M(isize,ccount,reg,addrmode) \
 	m_CycleCount += ccount; \
-	memory[addrmode] = reg; \
+	Memory_Write(addrmode, reg); \
 	pc += isize
 
 /** Function macro for writing a value from memory to a register */
 #define INSN_M_TO_R(isize,ccount,reg,addrmode) \
 	m_CycleCount += ccount; \
-	reg = memory[addrmode]; \
+	reg = Memory_Read(addrmode); \
 	pc += isize
 
 /** Function macro for copying a value from one register to another */
@@ -58,16 +58,9 @@
 	regdst = regsrc; \
 	pc += isize
 
-/** Function macro for setting/clearing a flag based on a value. */
-#define HELPER_SETCLEARFLAG(cond,pflag) \
-	if (cond) \
-		Helper_SetFlag(pflag); \
-	else \
-		Helper_ClearFlag(pflag)
-
 /** Function macro for reporting an erroneous instruction decode */
 #define INSN_DECODE_ERROR() \
-	printf("ERROR: %s called with opcode 0x%.2X\n", __FUNCTION__, memory[pc])
+	printf("ERROR: %s called with opcode 0x%.2X\n", __FUNCTION__, Memory_Read(pc))
 
 /** \def PRINT_INSTRUCTION Prints the currently executing instruction */
 #if defined(_MSC_VER) && !defined(__MINGW32__)
@@ -142,7 +135,7 @@ class System65
 		 *
 		 * \param[in] memsize Amount of memory, in bytes, for this machine, up
 		 * to 64KB. Values greater than 64KB are clamped; a value of 0 will
-		 * throw.
+		 * throw. If not specified, the default is 0x1000 bytes (4KB).
 		 *
 		 * \todo Throw a specific exception
 		 */
@@ -197,7 +190,7 @@ class System65
 		 *
 		 * \return The byte value at the given address.
 		 */
-		uint8_t PeekByte(uint16_t addr) { return Helper_PeekByte(addr); }
+		uint8_t PeekByte(uint16_t addr) { return Memory_Read(addr); }
 
 		/** Returns the word at the given address in the vm's memory.
 		 *
@@ -208,14 +201,14 @@ class System65
 		 * \note The 6502 uses little-endian format for multi-byte values; this
 		 * method obeys that endianness, regardless of platform.
 		 */
-		uint16_t PeekWord(uint16_t addr) { return Helper_PeekWord(addr); }
+		uint16_t PeekWord(uint16_t addr) { return Memory_ReadWord(addr); }
 
 		/** Writes <tt>val</tt> to memory at <tt>addr</tt>.
 		 *
 		 * \param[in] addr Address to write the value to
 		 * \param[in] val Value to write to the given address
 		 */
-		void Poke(uint16_t addr, uint8_t val) { Helper_Poke(addr,val); }
+		void Poke(uint16_t addr, uint8_t val) { Memory_Write(addr,val); }
 
 		/** Writes <tt>val</tt> to memory at <tt>addr</tt>.
 		 *
@@ -225,7 +218,7 @@ class System65
 		 * \note The 6502 uses little-endian format for multi-byte values; this
 		 * method obeys that endianness, regardless of platform.
 		 */
-		void Poke(uint16_t addr, uint16_t val) { Helper_Poke(addr,val); }
+		void Poke(uint16_t addr, uint16_t val) { Memory_Write(addr,val); }
 
 		/** Pushes a byte to the virtual CPU's stack
 		 *
@@ -256,6 +249,72 @@ class System65
 		 * method obeys that endianness, regardless of platform.
 		 */
 		uint16_t PopWord(void) { return Helper_PopWord(); }
+
+		//----------------------------------------------------------------------
+		// Memory bus methods
+		//----------------------------------------------------------------------
+
+		/** Reads a byte from the memory bus.
+		 *
+		 * This function differs from the helper peek/poke in that it obeys the
+		 * underlying memory layout, so it will properly gate out-of-bounds
+		 * memory access as well as ensuring that devices on the memory bus
+		 * are accessed appropriately.
+		 *
+		 * \param[in] addr Address to read from
+		 *
+		 * \return Value stored at address <tt>addr</tt>
+		 *
+		 * \note An out-of-bounds memory access (access to memory that is not
+		 * mapped to anything) will return 0.
+		 */
+		uint8_t SYSTEM65CORE Memory_Read(uint16_t addr);
+
+		/** Reads a word (2 bytes) from the memory bus.
+		*
+		* This function differs from the helper peek/poke in that it obeys the
+		* underlying memory layout, so it will properly gate out-of-bounds
+		* memory access as well as ensuring that devices on the memory bus
+		* are accessed appropriately.
+		*
+		* \param[in] addr Address to read from
+		*
+		* \return Value stored at address <tt>addr</tt>
+		*
+		* \note An out-of-bounds memory access (access to memory that is not
+		* mapped to anything) will return 0.
+		*/
+		uint16_t SYSTEM65CORE Memory_ReadWord(uint16_t addr) { return (uint16_t)(Memory_Read(addr) + (Memory_Read(addr + 1) << 8)); }
+
+		/** Writes a byte to the memory bus.
+		 *
+		 * This function differs from the helper peek/poke in that it obeys the
+		 * underlying memory layout, so it will properly gate out-of-bounds
+		 * memory access as well as ensuring that devices on the memory bus
+		 * are accessed appropriately.
+		 *
+		 * \param[in] addr Address to write to
+		 * \param[in] val Value to write to memory
+		 *
+		 * \note An out-of-bounds write (write to memory that is not mapped to
+		 * anything) will be ignored. */
+		void SYSTEM65CORE Memory_Write(uint16_t addr, uint8_t val);
+
+		/** Writes a word (2 bytes) to the memory bus.
+		*
+		* This function differs from the helper peek/poke in that it obeys the
+		* underlying memory layout, so it will properly gate out-of-bounds
+		* memory access as well as ensuring that devices on the memory bus
+		* are accessed appropriately.
+		*
+		* \param[in] addr Address to write to
+		* \param[in] val Value to write to memory
+		*
+		* \note An out-of-bounds write (write to memory that is not mapped to
+		* anything) will be ignored. */
+		void SYSTEM65CORE Memory_Write(uint16_t addr, uint16_t val);
+
+		//----------------------------------------------------------------------
 
 		/** Generates an external interrupt
 		 *
@@ -685,26 +744,26 @@ class System65
 		 *
 		 * \return Value at the specified address
 		 */
-		uint8_t SYSTEM65CORE Helper_PeekByte(uint16_t addr); //!< Read a byte from memory
+		//uint8_t SYSTEM65CORE Helper_PeekByte(uint16_t addr); //!< Read a byte from memory
 
 		/**
 		 * \param[in] addr Address to read the value from
 		 *
 		 * \return Value at the specified address
 		 */
-		uint16_t SYSTEM65CORE Helper_PeekWord(uint16_t addr); //!< Read a word (2 bytes) from memory
+		//uint16_t SYSTEM65CORE Helper_PeekWord(uint16_t addr); //!< Read a word (2 bytes) from memory
 
 		/**
 		 * \param[in] addr Address to write the value to
 		 * \param[in] val Value to write to the specified address
 		 */
-		void SYSTEM65CORE Helper_Poke(uint16_t addr, uint8_t val); //!< Write a byte into memory
+		//void SYSTEM65CORE Helper_Poke(uint16_t addr, uint8_t val); //!< Write a byte into memory
 
 		/**
 		 * \param[in] addr Address to write the value to
 		 * \param[in] val Value to write to the specified address
 		 */
-		void SYSTEM65CORE Helper_Poke(uint16_t addr, uint16_t val); //!< Write a word (2 bytes) into memory
+		//void SYSTEM65CORE Helper_Poke(uint16_t addr, uint16_t val); //!< Write a word (2 bytes) into memory
 
 		/**
 		 * \param[in] flag Flag to set
@@ -770,6 +829,14 @@ class System65
 		bool SYSTEM65CORE Helper_HandleInterrupt(void);
 
 		/** @} */
+
+		/** Checks the address <tt>addr</tt> to see if it's accessible.
+		 *
+		 * \param[in] addr Address to check
+		 *
+		 * \return true if the memory can be accessed, false if not.
+		 */
+		bool SYSTEM65CORE Memory_BoundsCheck(uint16_t addr);
 
 		/** \defgroup module_instructions CPU instructions
 		 *

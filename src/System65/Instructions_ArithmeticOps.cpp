@@ -4,15 +4,16 @@
 
 #define LOCAL_LOADVAL(isize,ccount,addrmode) \
 	m_CycleCount += ccount; \
-	val = memory[addrmode]; \
+	val = Memory_Read(addrmode); \
 	pc += isize
+
 void SYSTEM65CORE System65::Insn_ADC(void)
 {
 #ifdef DEBUG_PRINT_INSTRUCTION
 	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
 	uint16_t val,nval;
-	switch(memory[pc]) {
+	switch(Memory_Read(pc)) {
 	case 0x69: // immediate
 		LOCAL_LOADVAL(2,2,Addr_IMM()); break;
 	case 0x65: // zeropage
@@ -39,7 +40,7 @@ void SYSTEM65CORE System65::Insn_ADC(void)
 		uint16_t bval = (((val) >> 4)*10) + ((val) & 0x0F);
 
 		nval = ba + bval + (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
-		HELPER_SETCLEARFLAG((nval > 99),System65::PFLAG_C);
+		Helper_SetClear(System65::PFLAG_C, (nval > 99));
 		if (nval > 99)
 			nval -= 100;
 		a = ((((nval)/10) % 10) << 4) | ((nval) % 10);
@@ -53,8 +54,8 @@ void SYSTEM65CORE System65::Insn_ADC(void)
 		// Non-BCD mode
 		// Add w/ carry
 		nval = a + val + (Helper_GetFlag(System65::PFLAG_C) ? 1 : 0);
-		HELPER_SETCLEARFLAG((nval&0xFF00),System65::PFLAG_C); // TODO: Check me for neg values
-		HELPER_SETCLEARFLAG((((a&0x80)==(val&0x80))&&((a&0x80)!=(nval&0x80))),System65::PFLAG_V);
+		Helper_SetClear(System65::PFLAG_C, (nval & 0xFF00) != 0); // TODO: Check me for neg values
+		Helper_SetClear(System65::PFLAG_V, (((a & 0x80) == (val & 0x80)) && ((a & 0x80) != (nval & 0x80))) != 0);
 		a = (uint8_t)nval;
 
 		// Overflow occurs when the result is outside of the range -128 - 127.
@@ -67,8 +68,9 @@ void SYSTEM65CORE System65::Insn_ADC(void)
 		// testadc.asm tests ADC and SBC to see if V handling is done correctly.
 	}
 
-	HELPER_SETCLEARFLAG(((a&0xFF)==0),System65::PFLAG_Z);
-	HELPER_SETCLEARFLAG((a&0x80),System65::PFLAG_N);
+	Helper_SetClear(System65::PFLAG_Z, (a & 0xFF) == 0);
+
+	Helper_SetClear(System65::PFLAG_N, (a & 0x80) != 0);
 }
 
 void SYSTEM65CORE System65::Insn_SBC(void)
@@ -77,7 +79,7 @@ void SYSTEM65CORE System65::Insn_SBC(void)
 	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
 	uint16_t val,nval;
-	switch(memory[pc]) {
+	switch (Memory_Read(pc)) {
 	case 0xe9: // immediate
 		LOCAL_LOADVAL(2,2,Addr_IMM()); break;
 	case 0xe5: // zeropage
@@ -103,15 +105,15 @@ void SYSTEM65CORE System65::Insn_SBC(void)
 		uint16_t bval = (((val) >> 4)*10) + ((val) & 0x0F);
 
 		nval = ba - bval - (Helper_GetFlag(System65::PFLAG_C) ? 0 : 1);
-		HELPER_SETCLEARFLAG((nval < 0x64),System65::PFLAG_C); // FIXME: Make sure this is correct
+		Helper_SetClear(System65::PFLAG_C, (nval < 0x64)); // FIXME: Make sure this is correct
 		if (nval > 0x63)
 			nval += 100;
 		a = ((((nval)/10) % 10) << 4) | ((nval) % 10);
 	} else {
 		// subtract w/ carry
 		nval = a - val - (Helper_GetFlag(System65::PFLAG_C) ? 0 : 1);
-		HELPER_SETCLEARFLAG(!(nval&0xFF00),System65::PFLAG_C); // TODO: check me
-		HELPER_SETCLEARFLAG((((a&0x80)!=(val&0x80))&&((a&0x80)!=(nval&0x80))),System65::PFLAG_V);
+		Helper_SetClear(System65::PFLAG_C, !(nval & 0xFF00)); // TODO: check me
+		Helper_SetClear(System65::PFLAG_V, (((a & 0x80) != (val & 0x80)) && ((a & 0x80) != (nval & 0x80))) != 0);
 		a = (uint8_t)nval;
 
 		// Overflow occurs when the result is outside of the range -128 - 127.
@@ -123,8 +125,9 @@ void SYSTEM65CORE System65::Insn_SBC(void)
 		// testadc.asm tests ADC and SBC to see if V handling is done correctly.
 	}
 
-	HELPER_SETCLEARFLAG(((a&0xFF)==0),System65::PFLAG_Z);
-	HELPER_SETCLEARFLAG((a&0x80),System65::PFLAG_N);
+	Helper_SetClear(System65::PFLAG_Z, (a & 0xFF) == 0);
+
+	Helper_SetClear(System65::PFLAG_N, (a & 0x80) != 0);
 }
 
 void SYSTEM65CORE System65::Insn_CMP(void)
@@ -133,7 +136,7 @@ void SYSTEM65CORE System65::Insn_CMP(void)
 	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
 	uint8_t val;
-	switch (memory[pc]) {
+	switch (Memory_Read(pc)) {
 	case 0xc9: // immediate
 		LOCAL_LOADVAL(2,2,Addr_IMM()); break;
 	case 0xc5: // zeropage
@@ -158,10 +161,7 @@ void SYSTEM65CORE System65::Insn_CMP(void)
 
 	Helper_SetClearZ(a == val); // zero
 
-	if ((a - val)&0x80) // negative
-		Helper_SetFlag(System65::PFLAG_N);
-	else
-		Helper_ClearFlag(System65::PFLAG_N);
+	Helper_SetClear(System65::PFLAG_N, ((a - val) & 0x80) != 0); // negative
 }
 
 void SYSTEM65CORE System65::Insn_CPX(void)
@@ -170,7 +170,7 @@ void SYSTEM65CORE System65::Insn_CPX(void)
 	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
 	uint8_t val;
-	switch(memory[pc]) {
+	switch (Memory_Read(pc)) {
 	case 0xe0: // immediate
 		LOCAL_LOADVAL(2,2,Addr_IMM()); break;
 	case 0xe4: // zeropage
@@ -181,20 +181,11 @@ void SYSTEM65CORE System65::Insn_CPX(void)
 		INSN_DECODE_ERROR(); return;
 	}
 
-	if (x >= val) // carry
-		pf |= System65::PFLAG_C;
-	else
-		pf &= ~(System65::PFLAG_C);
+	Helper_SetClearC(x >= val); // carry
 
-	if (x == val) // zero
-		pf |= System65::PFLAG_Z;
-	else
-		pf &= ~(System65::PFLAG_Z);
+	Helper_SetClearZ(x == val); // zero
 
-	if ((x - val)&0x80) // negative
-		pf |= System65::PFLAG_N;
-	else
-		pf &= ~(System65::PFLAG_N);
+	Helper_SetClear(System65::PFLAG_N, ((x - val) & 0x80) != 0); // negative
 }
 
 void SYSTEM65CORE System65::Insn_CPY(void)
@@ -203,7 +194,7 @@ void SYSTEM65CORE System65::Insn_CPY(void)
 	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
 	uint8_t val;
-	switch(memory[pc]) {
+	switch (Memory_Read(pc)) {
 	case 0xc0: // immediate
 		LOCAL_LOADVAL(2,2,Addr_IMM()); break;
 	case 0xc4: // zeropage
@@ -214,19 +205,10 @@ void SYSTEM65CORE System65::Insn_CPY(void)
 		INSN_DECODE_ERROR(); return;
 	}
 
-	if (y >= val) // carry
-		pf |= System65::PFLAG_C;
-	else
-		pf &= ~(System65::PFLAG_C);
+	Helper_SetClearC(y >= val); // carry
 
-	if (y == val) // zero
-		pf |= System65::PFLAG_Z;
-	else
-		pf &= ~(System65::PFLAG_Z);
+	Helper_SetClearZ(y == val); // zero
 
-	if ((y - val)&0x80) // negative
-		pf |= System65::PFLAG_N;
-	else
-		pf &= ~(System65::PFLAG_N);
+	Helper_SetClear(System65::PFLAG_N, ((y - val) & 0x80) != 0); // negative
 }
 #undef LOCAL_LOADVAL

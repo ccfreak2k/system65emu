@@ -3,12 +3,12 @@
 // Logical Operations
 #define LOCAL_AND(isize,ccount,addrmode) \
 	m_CycleCount += ccount; \
-	a &= memory[addrmode]; \
+	a &= Memory_Read(addrmode); \
 	Helper_Set_ZN_Flags(a); \
 	pc += isize
 void SYSTEM65CORE System65::Insn_AND(void)
 {
-	switch(memory[pc]) {
+	switch (Memory_Read(pc)) {
 	case 0x29: // immediate
 		LOCAL_AND(2,2,Addr_IMM()); break;
 	case 0x25: // zeropage
@@ -33,7 +33,7 @@ void SYSTEM65CORE System65::Insn_AND(void)
 
 #define LOCAL_EOR(isize,ccount,addrmode) \
 	m_CycleCount += ccount; \
-	a ^= memory[addrmode]; \
+	a ^= Memory_Read(addrmode); \
 	Helper_Set_ZN_Flags(a); \
 	pc += isize
 void SYSTEM65CORE System65::Insn_EOR(void)
@@ -41,7 +41,7 @@ void SYSTEM65CORE System65::Insn_EOR(void)
 #ifdef DEBUG_PRINT_INSTRUCTION
 	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
-	switch(memory[pc]) {
+	switch (Memory_Read(pc)) {
 	case 0x49: // immediate
 		LOCAL_EOR(2,2,Addr_IMM()); break;
 	case 0x45: // zeropage
@@ -66,7 +66,7 @@ void SYSTEM65CORE System65::Insn_EOR(void)
 
 #define LOCAL_ORA(isize,ccount,addrmode) \
 	m_CycleCount += ccount; \
-	a |= memory[addrmode]; \
+	a |= Memory_Read(addrmode); \
 	Helper_Set_ZN_Flags(a); \
 	pc += isize
 void SYSTEM65CORE System65::Insn_ORA(void)
@@ -74,7 +74,7 @@ void SYSTEM65CORE System65::Insn_ORA(void)
 #ifdef DEBUG_PRINT_INSTRUCTION
 	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
-	switch(memory[pc]) {
+	switch (Memory_Read(pc)) {
 	case 0x09: // immediate
 		LOCAL_ORA(2,2,Addr_IMM()); break;
 	case 0x05: // zeropage
@@ -103,34 +103,24 @@ void SYSTEM65CORE System65::Insn_BIT(void)
 	PRINT_INSTRUCTION();
 #endif // DEBUG_PRINT_INSTRUCTION
 	uint8_t val;
-	switch (memory[pc]) {
+	switch (Memory_Read(pc)) {
 	case 0x24: // zeropage
 		m_CycleCount += 3;
-		val = memory[Addr_ZPG()];
+		val = Memory_Read(Addr_ZPG());
 		pc += 2;
 		break;
 	case 0x2c: // absolute
 		m_CycleCount += 4;
-		val = memory[Addr_ABS()];
+		val = Memory_Read(Addr_ABS());
 		pc += 3;
 		break;
 	default:
 		INSN_DECODE_ERROR(); return;
 	}
 
-	if (a & val)
-		pf &= ~System65::PFLAG_Z;
-	else
-		pf |= System65::PFLAG_Z;
+	Helper_SetClear(System65::PFLAG_Z, (a & val) == 0); // zero
 
-    // TODO: Faster/more concise bit setting
-    if (val & 0x80)
-		pf |= System65::PFLAG_N;
-	else
-		pf &= ~System65::PFLAG_N;
+	Helper_SetClear(System65::PFLAG_N, (val & 0x80) != 0); // negative
 
-	if (val & 0x40)
-		pf |= System65::PFLAG_V;
-	else
-		pf &= ~System65::PFLAG_V;
+	Helper_SetClear(System65::PFLAG_V, (val & 0x40) != 0); // overflow
 }

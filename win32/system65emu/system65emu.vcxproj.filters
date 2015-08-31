@@ -128,6 +128,12 @@
     <ClCompile Include="..\..\src\System65Silt\Silt_AddressModes.cpp">
       <Filter>Source Files\System65Silt</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\System65Silt\Silt_Instructions_Stack.cpp">
+      <Filter>Source Files\System65Silt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\System65\Memory.cpp">
+      <Filter>Source Files\System65</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <MASM Include="..\..\src\System65Silt\Silt_AsmHelpers.asm">
