@@ -64,9 +64,6 @@ void System65::LoadProgram(std::string filename, unsigned int offset)
 	if (!file.good())
 		throw;
 
-	if (!file)
-		throw;
-
 	std::vector<uint8_t> prog(size);
 	file.read(reinterpret_cast<char*>(prog.data()), size);
 
