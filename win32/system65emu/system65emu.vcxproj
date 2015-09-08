@@ -194,6 +194,8 @@ copy $(OutDir)$(TargetName)$(TargetExt) $(OutDir)..\..\$(TargetName)$(TargetExt)
     <ClInclude Include="..\..\src\System65Silt\Silt_AsmHelpers.h" />
     <ClInclude Include="..\..\src\System65Silt\System65Silt.hpp" />
     <ClInclude Include="..\..\src\System65\System65.hpp" />
+    <ClInclude Include="..\..\src\Trace\BinaryRecord.hpp" />
+    <ClInclude Include="..\..\src\Trace\Yaml.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\main.cpp" />
@@ -227,7 +229,8 @@ copy $(OutDir)$(TargetName)$(TargetExt) $(OutDir)..\..\$(TargetName)$(TargetExt)
     <ClCompile Include="..\..\src\System65\Instructions_System.cpp" />
     <ClCompile Include="..\..\src\System65\Memory.cpp" />
     <ClCompile Include="..\..\src\System65\System65.cpp" />
-    <ClCompile Include="..\..\src\Trace.cpp" />
+    <ClCompile Include="..\..\src\Trace\BinaryRecord.cpp" />
+    <ClCompile Include="..\..\src\Trace\Yaml.cpp" />
   </ItemGroup>
   <ItemGroup>
     <MASM Include="..\..\src\System65Silt\Silt_AsmHelpers.asm" />

@@ -4,14 +4,14 @@
 
 uint8_t SYSTEM65CORE System65::Memory_Read(uint16_t addr) {
 	if (Memory_BoundsCheck(addr))
-		return memory[addr];
+		return (*m_Memory)[addr];
 	else
 		return 0;
 }
 
 void SYSTEM65CORE System65::Memory_Write(uint16_t addr, uint8_t val) {
 	if (Memory_BoundsCheck(addr))
-		memory[addr] = val;
+		(*m_Memory)[addr] = val;
 }
 
 void SYSTEM65CORE System65::Memory_Write(uint16_t addr, uint16_t val) {

@@ -3,7 +3,7 @@
 #if defined(_MSC_VER) && !defined(_DEBUG)
 INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT)
 #else
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 #endif //_MSC_VER && !_DEBUG
 {
 	extern char *optarg; // Used for getopt()
@@ -19,17 +19,18 @@ int main (int argc, char **argv)
 #ifndef _MSC_VER
 	int c;
 	FILE *progfile = NULL;
-	while ((c = getopt(argc,argv,"b:s:i:h")) != -1) {
+	while ((c = getopt(argc, argv, "b:s:i:h")) != -1) {
 		switch (c) {
 		case 'b':
 			// Load a program file into memory
-			progfile = fopen(optarg,"rb");
+			progfile = fopen(optarg, "rb");
 			if (progfile != NULL) {
-				printf("Loading file %s\n",optarg);
+				printf("Loading file %s\n", optarg);
 				sys.LoadProgram(progfile);
 				fclose(progfile);
-			} else {
-				printf("Could not open %s\n",optarg);
+			}
+			else {
+				printf("Could not open %s\n", optarg);
 				exit(1);
 			}
 			break;
@@ -46,23 +47,20 @@ int main (int argc, char **argv)
 			ShowHelp();
 			exit(0);
 		default:
-			printf("Unrecognized option: %c\n",c);
+			printf("Unrecognized option: %c\n", c);
 			ShowHelp();
 			exit(1);
 		}
 	}
 #else //_MSC_VER
 	// TODO: implement arbitrary file loading
-	FILE *progfile = NULL;
-	char *filename = "6502_functional_test_new.bin";
-	progfile = fopen(filename,"rb");
-	if (progfile != NULL) {
-		printf("Loading file %s...\n",filename);
-		sys.LoadProgram(progfile);
-		fclose(progfile);
-	} else {
-		printf("Could not open %s\n",filename);
-		exit(1);
+	std::string filename("6502_functional_test_new.bin");
+	std::cout << "Loading file " << filename << "..." << std::endl;
+	try {
+		sys.LoadProgram(filename);
+	}
+	catch (...) {
+		std::cerr << "Error loading file " << filename << " (exception occurred)" << std::endl;
 	}
 #endif //_MSC_VER
 
@@ -74,11 +72,11 @@ int main (int argc, char **argv)
 	// Load the font
 	sf::Texture fonttex;
 #ifdef _DEBUG
-	printf("Max texture size: %i\n",fonttex.getMaximumSize());
+	std::cout << "Max texture size: " << fonttex.getMaximumSize() << std::endl;
 #endif // _DEBUG
 	// This will probably never happen, but let's handle it anyway.
 	if (fonttex.getMaximumSize() < 256) {
-		printf("Error: Your hardware does not support 256x256 textures.\n");
+		std::cerr << "Error: Your hardware does not support 256x256 textures." << std::endl;
 #ifdef WIN32
 		MessageBox(NULL, L"Your hardware does not support 256x256 textures. This emulator cannot run.", L"Error", (MB_OK|MB_ICONERROR));
 #endif // WIN32
@@ -119,7 +117,7 @@ int main (int argc, char **argv)
 
 		while (window.pollEvent(event)) {
 			if (event.type == sf::Event::Closed) {
-				printf("[DEBUG] Window closed\n");
+				std::cout << "[DEBUG] Window closed" << std::endl;
 				window.close();
 			}
 		}
@@ -136,7 +134,7 @@ int main (int argc, char **argv)
 		window.display();
 	}
 
-	printf("Finished\n");
+	std::cout << "Finished" << std::endl;
 	bStopExec = true;
 	SystemThread.join();
 	exit(0);
@@ -223,8 +221,6 @@ void DrawStats(sf::Sprite screenbuf[EMUSCREEN_WIDTH][EMUSCREEN_HEIGHT], System65
 	DrawString(screenbuf,str,106,1);
 	uint8_t f = sys->GetRegister_P();
 	char *p = str;
-//	for (int i = 0x01; i < 256; i <<= 1)
-//		strcat(str,((f & i) == i) ? "1" : "0");
 	for (int i = 0x80; i > 0; i >>= 1)
 		*p++ = (f & i) ? '1' : '0';
 	DrawString(screenbuf,str,83,2);
@@ -246,16 +242,15 @@ void DrawChar(sf::Sprite screenbuf[EMUSCREEN_WIDTH][EMUSCREEN_HEIGHT], char c, u
 	unsigned char uc = (unsigned char)c;
 	unsigned xpos = (uc % TEXCHAR_CELLS) * TEXCHAR_WIDTH;
 	unsigned ypos = (uc / TEXCHAR_CELLS) * TEXCHAR_HEIGHT;
-	//printf("%u,%u (%u,%u), c %c\n",xpos,ypos,xpos/TEXCHAR_WIDTH,ypos/TEXCHAR_HEIGHT,c);
 	screenbuf[x][y].setTextureRect(sf::IntRect(xpos,ypos,TEXCHAR_WIDTH,TEXCHAR_HEIGHT));
 }
 
 void ShowHelp(void)
 {
-	printf("Available options: \n");
+	std::cout << "Available options: " << std::endl;
 	// -b -s -i
-	printf("-b filename: Loads a file into program memory\n");
-	printf("-s 0xNN    : Sets the stack base to 0xNN00; default is 0x01\n");
-	printf("-i 0xNNNN  : Sets the interrupt vector to 0xNNNN; default is 0xFFFE\n");
-	printf("-h         : Shows this help text\n");
+	std::cout << "-b filename: Loads a file into program memory" << std::endl;
+	std::cout << "-s 0xNN    : Sets the stack base to 0xNN00; default is 0x01" << std::endl;
+	std::cout << "-i 0xNNNN  : Sets the interrupt vector to 0xNNNN; default is 0xFFFE" << std::endl;
+	std::cout << "-h         : Shows this help text" << std::endl;
 }

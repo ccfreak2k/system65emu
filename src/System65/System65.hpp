@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <ctime>
@@ -22,6 +23,9 @@
 // Class-related libs
 #include <SFML/System/Mutex.hpp>
 #include <yaml-cpp/yaml.h>
+
+// Project libs
+#include <Trace/BinaryRecord.hpp>
 
 /** \file System65.hpp
  * Interface for the \ref System65 class.
@@ -34,6 +38,7 @@
 	#define SYSTEM65CORE
 #endif
 
+#define MAX_MEM_SIZE 0x10000 //!< Maximum number of bytes available for system memory; 64KB for just about every kind of 6502.
 #define STACK_BASE 0x0100 //!< Base address for the stack
 #define CODE_BASE 0x0200 //!< Base address for code
 
@@ -70,6 +75,8 @@
 #define PRINT_INSTRUCTION)() \
 	printf("[DEBUG] %s, pc = 0x%.4X\n", __PRETTY_FUNCTION__, pc)
 #endif // defined(_MSC_VER) && !defined(__MINGW32__)
+
+typedef std::vector<uint8_t> bytevec_t; //!< typedef for an array of bytes
 
 /** \class System65
  * The System65 CPU emulator class.
@@ -256,10 +263,9 @@ class System65
 
 		/** Reads a byte from the memory bus.
 		 *
-		 * This function differs from the helper peek/poke in that it obeys the
-		 * underlying memory layout, so it will properly gate out-of-bounds
-		 * memory access as well as ensuring that devices on the memory bus
-		 * are accessed appropriately.
+		 * This method obeys the underlying memory layout, so it will properly
+		 * gate out-of-bounds memory access as well as ensuring that devices on
+		 * the memory bus are accessed appropriately.
 		 *
 		 * \param[in] addr Address to read from
 		 *
@@ -272,10 +278,9 @@ class System65
 
 		/** Reads a word (2 bytes) from the memory bus.
 		*
-		* This function differs from the helper peek/poke in that it obeys the
-		* underlying memory layout, so it will properly gate out-of-bounds
-		* memory access as well as ensuring that devices on the memory bus
-		* are accessed appropriately.
+		* This method obeys the underlying memory layout, so it will properly
+		* gate out-of-bounds memory access as well as ensuring that devices on
+		* the memory bus are accessed appropriately.
 		*
 		* \param[in] addr Address to read from
 		*
@@ -288,10 +293,9 @@ class System65
 
 		/** Writes a byte to the memory bus.
 		 *
-		 * This function differs from the helper peek/poke in that it obeys the
-		 * underlying memory layout, so it will properly gate out-of-bounds
-		 * memory access as well as ensuring that devices on the memory bus
-		 * are accessed appropriately.
+		 * This method obeys the underlying memory layout, so it will properly
+		 * gate out-of-bounds memory access as well as ensuring that devices on
+		 * the memory bus are accessed appropriately.
 		 *
 		 * \param[in] addr Address to write to
 		 * \param[in] val Value to write to memory
@@ -302,10 +306,9 @@ class System65
 
 		/** Writes a word (2 bytes) to the memory bus.
 		*
-		* This function differs from the helper peek/poke in that it obeys the
-		* underlying memory layout, so it will properly gate out-of-bounds
-		* memory access as well as ensuring that devices on the memory bus
-		* are accessed appropriately.
+		* This method obeys the underlying memory layout, so it will properly
+		* gate out-of-bounds memory access as well as ensuring that devices on
+		* the memory bus are accessed appropriately.
 		*
 		* \param[in] addr Address to write to
 		* \param[in] val Value to write to memory
@@ -366,8 +369,16 @@ class System65
 
 		/** Ends a currently-recording trace.
 		 *
+		 * This method will end a trace recording regardless of how many instructions
+		 * are left.
 		 */
 		void EndRecordTrace(void);
+
+		/** Returns whether a trace is currently running
+		 *
+		 * \return Whether a trace is currently running
+		 */
+		bool IsTraceRunning(void);
 
 		/** Resets the cycle counter. */
 		void ResetCycleCount(void) { m_CycleCount = 0; }
@@ -378,8 +389,6 @@ class System65
 		 * program data pointed to by progmem into emulator memory. The function
 		 * will return when either the maximum amount of data has been loaded or
 		 * the limit specified by progsize has been reached.
-		 *
-		 * \note offset is currently not bounds-checked.
 		 *
 		 * \param[in] progmem Program data to load into emulator memory
 		 * \param[in] progsize Size of the program data, in bytes
@@ -397,12 +406,11 @@ class System65
 		 *
 		 * \note offset is currently not bounds-checked.
 		 *
-		 * \param[in] progfile File handle to a file to load into emulator
-		 * memory
+		 * \param[in] filename Name/path of the file to load
 		 * \param[in] offset The address in memory that the binary should be
-		 * loaded to.
+		 * loaded to; default is <tt>0x0200</tt>.
 		 */
-		void LoadProgram(FILE *progfile, unsigned int offset = 0x200);
+		void LoadProgram(std::string filename, unsigned int offset = 0x200);
 
 		/** Performs a hot reset of the machine.
 		 *
@@ -411,13 +419,6 @@ class System65
 		 */
 		void Reset(void);
 
-		/** Returns whether a trace is currently running
-		 *
-		 * \return Whether a trace is currently running
-		 */
-		bool IsTraceRunning(void);
-
-		uint8_t *memory; //!< Pointer to system memory for this system
 		unsigned int memorysize; //!< Size of memory for this system.
 
 	protected:
@@ -425,8 +426,10 @@ class System65
 		unsigned int m_CycleCount; //!< Tracks the number of cycles executed so far.
 		unsigned int m_InstructionCount; //!< Tracks the number of instructions retired (executed) so far.
 
-		YAML::Emitter *m_Trace; //!< YAML emitter for the trace file
-		unsigned int m_TraceFrameCount; //!< How many frames are in the current trace
+		std::unique_ptr<std::vector<uint8_t>> m_Memory; //!< System memory for this system \note Access to this memory is gated through Memory_Read() and Memory_Write().
+		std::shared_ptr<std::vector<uint8_t>> m_TraceMemory; //!< A "filtered" copy of memory for the tracing system
+
+		std::unique_ptr<Trace::BinaryRecord> m_Trace; //!< Trace object for recording a CPU trace
 
 		std::clock_t m_CStart; //!< Starting clock for measuing execution speed
 		std::clock_t m_CStop; //!< Ending clock for measuring execution speed
@@ -738,32 +741,6 @@ class System65
 		 * relative jump
 		 */
 		void SYSTEM65CORE Helper_SetBranch(bool branch); //!< Set PC to the relative address
-
-		/**
-		 * \param[in] addr Address to read the value from
-		 *
-		 * \return Value at the specified address
-		 */
-		//uint8_t SYSTEM65CORE Helper_PeekByte(uint16_t addr); //!< Read a byte from memory
-
-		/**
-		 * \param[in] addr Address to read the value from
-		 *
-		 * \return Value at the specified address
-		 */
-		//uint16_t SYSTEM65CORE Helper_PeekWord(uint16_t addr); //!< Read a word (2 bytes) from memory
-
-		/**
-		 * \param[in] addr Address to write the value to
-		 * \param[in] val Value to write to the specified address
-		 */
-		//void SYSTEM65CORE Helper_Poke(uint16_t addr, uint8_t val); //!< Write a byte into memory
-
-		/**
-		 * \param[in] addr Address to write the value to
-		 * \param[in] val Value to write to the specified address
-		 */
-		//void SYSTEM65CORE Helper_Poke(uint16_t addr, uint16_t val); //!< Write a word (2 bytes) into memory
 
 		/**
 		 * \param[in] flag Flag to set

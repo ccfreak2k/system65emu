@@ -23,8 +23,10 @@
 #endif // WIN32
 
 #include <atomic>
-#include <thread>
+#include <exception>
+#include <iostream>
 #include <mutex>
+#include <thread>
 
 #ifdef __cplusplus
     #include <cstdlib>

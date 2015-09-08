@@ -31,6 +31,12 @@
     <Filter Include="Header Files\System65Silt">
       <UniqueIdentifier>{277c551d-5438-47c2-8445-c15e587fae94}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Trace">
+      <UniqueIdentifier>{27d8d573-b5fa-4ea0-979d-e062289e1284}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Trace">
+      <UniqueIdentifier>{ad8376be-58da-406e-b32a-221be584d69e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\main.hpp">
@@ -50,6 +56,12 @@
     </ClInclude>
     <ClInclude Include="..\..\src\System65Silt\Silt_AsmHelpers.h">
       <Filter>Header Files\System65Silt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Trace\Yaml.hpp">
+      <Filter>Header Files\Trace</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Trace\BinaryRecord.hpp">
+      <Filter>Header Files\Trace</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -104,9 +116,6 @@
     <ClCompile Include="..\..\src\SFMLContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Trace.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\System65Silt\System65Silt.cpp">
       <Filter>Source Files\System65Silt</Filter>
     </ClCompile>
@@ -133,6 +142,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\System65\Memory.cpp">
       <Filter>Source Files\System65</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Trace\Yaml.cpp">
+      <Filter>Source Files\Trace</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Trace\BinaryRecord.cpp">
+      <Filter>Source Files\Trace</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -18,6 +18,10 @@ void System65::StartRecordTrace(std::string filename, unsigned int instructionco
 	m_Trace = new YAML::Emitter();
 
 	*m_Trace << YAML::Comment("System65 Diagnostic Trace v0");
+	std::stringstream sInsnCount;
+	sInsnCount << "Expected instruction count: " << instructioncount;
+	*m_Trace << YAML::Comment(sInsnCount.str());
+	*m_Trace << YAML::Key << "progname" << YAML::Value << filename.c_str();
 }
 
 void System65::EndRecordTrace(void)
@@ -41,28 +45,34 @@ bool System65::IsTraceRunning(void)
 
 void System65::RecordFrame(unsigned int frameNumber, uint8_t oldMemory[0x10000], uint8_t newMemory[0x10000])
 {
-	if (m_Trace = nullptr)
-		return;
+	if (m_Trace == nullptr)
+		throw;
 
 	*m_Trace << YAML::BeginMap;
-		*m_Trace << YAML::Key << "frame" << YAML::Value << frameNumber;
-		*m_Trace << YAML::Key << "a" << YAML::Value << a;
-		*m_Trace << YAML::Key << "x" << YAML::Value << x;
-		*m_Trace << YAML::Key << "y" << YAML::Value << y;
-		*m_Trace << YAML::Key << "pf" << YAML::Value << pf;
-		*m_Trace << YAML::Key << "s" << YAML::Value << s;
-		*m_Trace << YAML::Key << "pc" << YAML::Value << pc;
+	*m_Trace << YAML::Key << "frame" << YAML::Value << frameNumber;
+	*m_Trace << YAML::Key << "a" << YAML::Value << a;
+	*m_Trace << YAML::Key << "x" << YAML::Value << x;
+	*m_Trace << YAML::Key << "y" << YAML::Value << y;
+	*m_Trace << YAML::Key << "pf" << YAML::Value << pf;
+	*m_Trace << YAML::Key << "s" << YAML::Value << s;
+	*m_Trace << YAML::Key << "pc" << YAML::Value << pc;
 
-		*m_Trace << YAML::Key << "memory" << YAML::Value << YAML::BeginMap;
-		// If there is no oldMemory[] then write all of the memory values
+	*m_Trace << YAML::Key << "memory" << YAML::Value;
+	// If there is no oldMemory[] then write all of the memory values
+	if (oldMemory == nullptr) {
+		*m_Trace << YAML::BeginSeq;
 		for (unsigned int i = 0; i > 0x10000; i++) {
-			if (oldMemory != NULL) {
-				if (oldMemory[i] != newMemory[i])
-					*m_Trace << YAML::Key << i << YAML::Value << newMemory[i];
-			} else
+			*m_Trace << newMemory[i];
+		}
+		*m_Trace << YAML::EndSeq;
+	} else { // Otherwise compare new memory
+		*m_Trace << YAML::BeginMap;
+		for (unsigned int i = 0; i > 0x10000; i++) {
+			if (oldMemory[i] != newMemory[i])
 				*m_Trace << YAML::Key << i << YAML::Value << newMemory[i];
 		}
 		*m_Trace << YAML::EndMap;
+	}
 
 	*m_Trace << YAML::EndMap;
 

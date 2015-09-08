@@ -17,27 +17,24 @@ System65::System65(unsigned int memsize) :
 	pf(System65::PFLAG_R|System65::PFLAG_I),
 	s(0xFD),
 	pc(CODE_BASE),
-	m_Trace(nullptr),
-	m_TraceFrameCount(0)
+	memorysize(memsize)
 {
 	// Basic bounds checking
-	if (memsize > 0x10000)
-		memsize = 0x10000;
+	if (memsize > MAX_MEM_SIZE)
+		memsize = MAX_MEM_SIZE;
 
 	if (memsize == 0)
 		throw;
 
-	memory = new uint8_t[0x10000];
-#if _DEBUG
-	assert(memory != NULL);
-#endif // _DEBUG
-	memset(memory,0,sizeof(uint8_t)*0xffff);
-	memorysize = memsize;
+	m_Memory = std::make_unique<std::vector<uint8_t>>(MAX_MEM_SIZE);
+
+	m_Trace = std::make_unique<Trace::BinaryRecord>();
+
+	m_TraceMemory = std::make_shared<std::vector<uint8_t>>(MAX_MEM_SIZE);
 }
 
 System65::~System65()
 {
-	delete [] memory;
 }
 
 void System65::LoadProgram(void *progmem, unsigned int progsize, unsigned int offset)
@@ -47,18 +44,37 @@ void System65::LoadProgram(void *progmem, unsigned int progsize, unsigned int of
 	if (progsize == 0)
 		return;
 
-	memcpy(&memory[offset],(uint8_t*)progmem,(size_t)((65536-offset) < progsize ? (65536-offset) : progsize));
+	uint8_t *m = static_cast<uint8_t*>(progmem);
+
+	//memcpy(&m_Memory[offset],(uint8_t*)progmem,(size_t)((65536-offset) < progsize ? (65536-offset) : progsize));
+	for (int i = offset; (i < MAX_MEM_SIZE) && ((i - offset) <= progsize); i++) {
+		Memory_Write(i, *m);
+	}
 
 	Reset();
 	pc = CODE_BASE;
 }
 
-void System65::LoadProgram(FILE *progfile, unsigned int offset)
+// TODO: More descriptive throws
+void System65::LoadProgram(std::string filename, unsigned int offset)
 {
-	if (progfile == NULL)
-		return;
+	unsigned int size = MAX_MEM_SIZE - offset;
 
-	fread(&memory[offset],sizeof(uint8_t),(65536-offset),progfile);
+	std::ifstream file(filename, std::ios::binary);
+	if (!file.good())
+		throw;
+
+	if (!file)
+		throw;
+
+	std::vector<uint8_t> prog(size);
+	file.read(reinterpret_cast<char*>(prog.data()), size);
+
+	if (!file.good() && !file.eof())
+		throw;
+
+	for (uint16_t i = 0; (i < MAX_MEM_SIZE - CODE_BASE) && (i < size); i++)
+		Memory_Write(i+offset, prog[i]);
 
 	Reset();
 	pc = CODE_BASE;
@@ -496,6 +512,8 @@ void SYSTEM65CORE System65::Dispatch(void)
 		}
 
 		m_InstructionCount++;
+
+		//m_Trace->Snap(m_InstructionCount, a, x, y, pf, s, pc, &this->Memory_Read);
 	}
 
 #if _DEBUG
