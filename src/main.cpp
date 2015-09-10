@@ -15,54 +15,72 @@ int main(int argc, char **argv)
 	// Make a thread for the system
 	std::thread SystemThread(SystemExec);
 
-	// TODO: Make file loading more C++-ey
-#ifndef _MSC_VER
-	int c;
-	FILE *progfile = NULL;
-	while ((c = getopt(argc, argv, "b:s:i:h")) != -1) {
-		switch (c) {
-		case 'b':
-			// Load a program file into memory
-			progfile = fopen(optarg, "rb");
-			if (progfile != NULL) {
-				printf("Loading file %s\n", optarg);
-				sys.LoadProgram(progfile);
-				fclose(progfile);
-			}
-			else {
-				printf("Could not open %s\n", optarg);
-				exit(1);
-			}
-			break;
-		case 's':
-			sys.SetStackBasePage((uint8_t)(atoi(optarg)));
-			// Set the stack base
-			break;
-		case 'i':
-			// Set the interrupt vector
-			sys.SetInterruptVector((uint16_t)(atoi(optarg)));
-			break;
-		case 'h':
-			// Show the usage text
-			ShowHelp();
-			exit(0);
-		default:
-			printf("Unrecognized option: %c\n", c);
-			ShowHelp();
-			exit(1);
+	// Parse the command-line options
+	po::options_description desc("Available options");
+	desc.add_options()
+		("bin", po::value<std::string>(), "Loads a file into program memory")
+		("stack-base", po::value<std::uint8_t>(), "Sets the stack base to 0xNN00; default is 0x01")
+		("interrupt-vector", po::value<std::uint16_t>(), "Sets the interrupt vector to 0xNNNN; default is 0xFFFE")
+		("trace-write", po::value<std::string>(), "Writes out a trace file; extremely slow and only useful for emulator development!")
+		("trace-read", po::value<std::string>(), "Reads in a trace file; extremely slow and only useful for emulator development!")
+		("help", "Shows this help text");
+
+	po::variables_map povm;
+	try {
+		po::store(po::parse_command_line(argc, argv, desc), povm);
+	}
+	catch (boost::program_options::required_option& e) {
+		std::cerr << "Error parsing command line: " << e.what() << std::endl;
+		return 1;
+	}
+	catch (boost::program_options::error& e) {
+		std::cerr << e.what() << std::endl;
+		std::cout << desc << std::endl;
+		return 1;
+	}
+	po::notify(povm);
+
+	if (povm.count("help")) { // help text
+		std::cout << desc << std::endl;
+		return 0;
+	}
+
+	if (povm.count("bin")) { // Load binary file into memory
+		std::string filename = povm["bin"].as<std::string>();
+		std::cout << "Loading program file " << filename << std::endl;
+		try {
+			sys.LoadProgram(filename);
+		}
+		catch (...) {
+			std::cerr << "Error loading file " << filename << " (exception occurred)" << std::endl;
+			return 1;
 		}
 	}
-#else //_MSC_VER
-	// TODO: implement arbitrary file loading
-	std::string filename("6502_functional_test_new.bin");
-	std::cout << "Loading file " << filename << "..." << std::endl;
-	try {
-		sys.LoadProgram(filename);
+
+	// TODO: Make sure it can accept valid values as hex
+	if (povm.count("stack-base")) { // Set stack base
+		uint8_t sopt = povm["stack-base"].as<std::uint8_t>();
+		if (sopt > 255) { // Probably impossible...
+			std::cerr << "Stack base out of range (" << sopt << ")" << std::endl;
+			return 1;
+		}
+		else {
+			std::cout << "Setting stack base to 0x" << std::hex << std::uppercase << sopt << "00" << std::endl;
+			sys.SetStackBasePage(sopt);
+		}
 	}
-	catch (...) {
-		std::cerr << "Error loading file " << filename << " (exception occurred)" << std::endl;
+
+	if (povm.count("interrupt-vector")) { // Set interrupt vector
+
 	}
-#endif //_MSC_VER
+
+	if (povm.count("trace-write")) { // Record a trace file
+	
+	}
+
+	if (povm.count("trace-read")) { // Playback a trace file
+
+	}
 
 	// Make a render window
 	// should be 896x348
@@ -137,13 +155,13 @@ int main(int argc, char **argv)
 	std::cout << "Finished" << std::endl;
 	bStopExec = true;
 	SystemThread.join();
-	exit(0);
+	return 0;
 }
 
 void SystemExec(void) {
 	for (;;) {
 		if (bStopExec)
-			break;
+			return;
 
 		if (mutMachineState.try_lock()) {
 			// commented stuff is to make it run at 1MHz, roughly.
@@ -245,12 +263,3 @@ void DrawChar(sf::Sprite screenbuf[EMUSCREEN_WIDTH][EMUSCREEN_HEIGHT], char c, u
 	screenbuf[x][y].setTextureRect(sf::IntRect(xpos,ypos,TEXCHAR_WIDTH,TEXCHAR_HEIGHT));
 }
 
-void ShowHelp(void)
-{
-	std::cout << "Available options: " << std::endl;
-	// -b -s -i
-	std::cout << "-b filename: Loads a file into program memory" << std::endl;
-	std::cout << "-s 0xNN    : Sets the stack base to 0xNN00; default is 0x01" << std::endl;
-	std::cout << "-i 0xNNNN  : Sets the interrupt vector to 0xNNNN; default is 0xFFFE" << std::endl;
-	std::cout << "-h         : Shows this help text" << std::endl;
-}

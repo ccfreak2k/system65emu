@@ -35,6 +35,7 @@
 #endif // __cplusplus
 
 // Class-related libs
+#include <boost/program_options.hpp>
 #include <SFML/Graphics.hpp>
 
 // Project libs
@@ -147,6 +148,8 @@ std::atomic<bool> bStopExec = false; //!< Whether the VM should stop running; th
 
 std::mutex mutMachineState; //!< Lock for the entire VM state
 
+namespace po = boost::program_options;
+
 /** \fn int main(int argc, char **argv)
  * Main function for the emulator. This function initializes SDL and prepares
  * the emulated system for execution.
@@ -220,9 +223,5 @@ void DrawString(sf::Sprite screenbuf[EMUSCREEN_WIDTH][EMUSCREEN_HEIGHT], const c
  * \param[in] y Y position to draw at
  */
 void DrawChar(sf::Sprite screenbuf[EMUSCREEN_WIDTH][EMUSCREEN_HEIGHT], char c, unsigned int x, unsigned int y);
-
-/** Show options accepted by the program.
- */
-void ShowHelp(void);
 
 #endif // MAIN_HPP
