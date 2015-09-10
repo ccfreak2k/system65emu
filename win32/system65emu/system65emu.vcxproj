@@ -74,7 +74,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(SolutionDir)..\src;J:\boost\1_59_0\;J:\misc\projects\built\x86\yaml-cpp\include;$(IncludePath)</IncludePath>
-    <LibraryPath>J:\misc\projects\built\x86\yaml-cpp\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>J:\misc\projects\built\x86\yaml-cpp\lib;J:\boost\1_59_0\lib32-msvc-14.0;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>

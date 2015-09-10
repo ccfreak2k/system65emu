@@ -4,6 +4,7 @@
     <LocalDebuggerCommand>$(TargetDir)\..\..\$(TargetFileName)</LocalDebuggerCommand>
     <LocalDebuggerWorkingDirectory>$(ProjectDir)..\..\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerCommandArguments>--bin 6502_functional_test_new.bin</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LocalDebuggerCommand>$(TargetDir)\..\..\$(TargetFileName)</LocalDebuggerCommand>
