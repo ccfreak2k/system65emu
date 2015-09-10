@@ -20,7 +20,7 @@ void SYSTEM65CORE System65::Memory_Write(uint16_t addr, uint16_t val) {
 }
 
 // TODO: Create callback system to see if the address is valid anywhere
-bool SYSTEM65CORE System65::Memory_BoundsCheck(uint16_t addr) {
+bool SYSTEM65CORE inline System65::Memory_BoundsCheck(uint16_t addr) {
 	if (addr > memorysize)
 		return false;
 	else
