@@ -68,10 +68,13 @@ namespace Trace {
 		* \param[in] pc Current value of the program counter
 		* \param[in] memcb Callback function pointer for reading the VM's memory
 		*/
-		void Snap(uint32_t instructioncount, uint8_t a, uint8_t x, uint8_t y, uint8_t p, uint8_t s, uint16_t pc, const uint8_t(*memcb)(uint16_t));
+		void Snap(uint32_t instructioncount, uint8_t a, uint8_t x, uint8_t y, uint8_t p, uint8_t s, uint16_t pc, std::shared_ptr<std::vector<uint8_t>> mem);
 
 	protected:
 	private:
+		const uint8_t m_FileMajorVersion = 0x00; //!< Major version of the binary file format
+		const uint8_t m_FileMinorVersion = 0x00; //!< Minor version of the binary file format
+
 		std::string m_Filename; //!< Filename of the trace file
 
 		std::unique_ptr<std::ofstream> m_File; //!< Output file for the trace stream

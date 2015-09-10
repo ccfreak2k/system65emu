@@ -1,8 +1,7 @@
 #include "Trace/BinaryRecord.hpp"
 
 Trace::BinaryRecord::BinaryRecord(std::string filename) :
-	m_Filename(filename),
-	m_File(std::make_unique<std::ofstream>())
+	m_Filename(filename)
 {
 	// Throw if the filename is blank
 	if (m_Filename.empty())
@@ -15,7 +14,15 @@ Trace::BinaryRecord::BinaryRecord(std::string filename) :
 	std::string appendedfilename;
 	appendedfilename = m_Filename;
 	appendedfilename.append(".btr");
-	m_File = std::make_unique<std::ofstream>(filename, std::ios::binary | std::ios::trunc);
+	m_File = std::make_unique<std::ofstream>(appendedfilename, std::ios::binary | std::ios::trunc);
+
+	if (!m_File->good())
+		throw;
+
+	*m_File << m_FileMajorVersion << m_FileMinorVersion;
+
+	if (!m_File->good())
+		throw;
 }
 
 Trace::BinaryRecord::~BinaryRecord()
@@ -24,7 +31,7 @@ Trace::BinaryRecord::~BinaryRecord()
 }
 
 // TODO: Write the "native" values to the file instead of stuffing them into a buffer.
-void Trace::BinaryRecord::Snap(uint32_t instructioncount, uint8_t a, uint8_t x, uint8_t y, uint8_t p, uint8_t s, uint16_t pc, const uint8_t(*memcb)(uint16_t))
+void Trace::BinaryRecord::Snap(uint32_t instructioncount, uint8_t a, uint8_t x, uint8_t y, uint8_t p, uint8_t s, uint16_t pc, std::shared_ptr<std::vector<uint8_t>> mem)
 {
 	if (!m_File->good())
 		throw; // TODO: throw something specific
@@ -54,16 +61,14 @@ void Trace::BinaryRecord::Snap(uint32_t instructioncount, uint8_t a, uint8_t x, 
 	std::vector<uint8_t> buf(196622); // maximum frame size, assuming 14 + (65536*3) bytes per frame
 	unsigned len = 0; // length of the frame
 
-	std::vector<uint8_t> mem; // Allocate memory for current memory state
-	mem.reserve(0x10000);
-
 	uint8_t RegsModified = 0; // Which registers have been modified
 
 	// We build the buffer as we go
-	//(uint32_t)buf[0] = instructioncount;
-	//std::vector<double> v;
-	//double* a = &v[0];
-	buf[0] = instructioncount;
+	//HACK: more little endian writing
+	buf[0] = instructioncount&0xff;
+	buf[1] = (instructioncount >> 8) & 0xff;
+	buf[2] = (instructioncount >> 16) & 0xff;
+	buf[3] = (instructioncount >> 24) & 0xff;
 	len += 7; // incrementing the length on each write
 
 	// Compare registers
@@ -110,9 +115,8 @@ void Trace::BinaryRecord::Snap(uint32_t instructioncount, uint8_t a, uint8_t x, 
 	// Compare memory
 	//for (unsigned i = 0; i < 0x10000; i++) {
 	//for (std::vector<uint8_t>::iterator it = mem.begin(); it != mem.end(); ++it) {
-	for (std::vector<uint8_t>::size_type i = 0; i != mem.size(); i++) {
-		mem[i] = memcb(i); // Memory access is potentially expensive, so we copy it if we need it twice
-		if (mem[i] != m_OldMemory->at(i)) {
+	for (unsigned i = 0; i < 0x10000; i++) {
+		if ((*mem)[i] != (*m_OldMemory)[i]) {
 			// TODO: Figure out how to write the address natively
 			// although it might not be portable.
 			// writing it in little endian for now
@@ -120,10 +124,10 @@ void Trace::BinaryRecord::Snap(uint32_t instructioncount, uint8_t a, uint8_t x, 
 			len++;
 			buf[len] = (uint8_t)((i >> 8) & 0xff);
 			len++;
-			buf[len] = mem[i];
+			buf[len] = (*mem)[i];
 			len++;
 		}
-		m_OldMemory->at(i) = mem[i];
+		m_OldMemory->at(i) = (*mem)[i];
 	}
 
 	// len should now be at the appropriate length for this frame
@@ -132,6 +136,11 @@ void Trace::BinaryRecord::Snap(uint32_t instructioncount, uint8_t a, uint8_t x, 
 	buf[4] = (len & 0xff);
 	buf[5] = ((len >> 8) & 0xff);
 	len += 2;
-	for (auto it = buf.begin(); it != buf.end(); ++it)
-		*m_File << *it;
+	for (unsigned i = 0; i < len; i++)
+		*m_File << buf[i];
+
+	m_File->flush();
+
+	if (!m_File->good())
+		throw;
 }

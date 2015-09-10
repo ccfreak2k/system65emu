@@ -28,7 +28,7 @@ System65::System65(unsigned int memsize) :
 
 	m_Memory = std::make_unique<std::vector<uint8_t>>(MAX_MEM_SIZE);
 
-	m_Trace = std::make_unique<Trace::BinaryRecord>();
+	//m_Trace = std::make_unique<Trace::BinaryRecord>();
 
 	m_TraceMemory = std::make_shared<std::vector<uint8_t>>(MAX_MEM_SIZE);
 }
@@ -37,6 +37,7 @@ System65::~System65()
 {
 }
 
+// TODO: fix this or just remove this method completely
 void System65::LoadProgram(void *progmem, unsigned int progsize, unsigned int offset)
 {
 	if (progmem == NULL)
@@ -510,7 +511,15 @@ void SYSTEM65CORE System65::Dispatch(void)
 
 		m_InstructionCount++;
 
-		//m_Trace->Snap(m_InstructionCount, a, x, y, pf, s, pc, &this->Memory_Read);
+		// Copy memory for the snapshot
+		//for (unsigned i = 0; i < MAX_MEM_SIZE; i++)
+		//	(*m_TraceMemory)[i] = Memory_Read(i);
+
+		//m_Trace->Snap(m_InstructionCount, a, x, y, pf, s, pc, m_TraceMemory);
+
+		// 0x3264 is the value of pc if the functional test passes
+		//if (pc == 0x3264)
+		//	exit(0);
 	}
 
 #if _DEBUG
@@ -522,7 +531,7 @@ void SYSTEM65CORE System65::Dispatch(void)
 	if (curcyclecount >= 1000000) {
 		m_CStop = std::clock();
 		float time = 1000.0f * (m_CStop - m_CStart) / CLOCKS_PER_SEC;
-		std::cout << "1M cycles in " << time << "ms (" << 1/time*1000 << "MHz)\n";
+		std::cout << "1M cycles in " << time << "ms (" << 1/time*1000 << "MHz)" << std::endl;
 		curcyclecount -= 1000000;
 		start_clock = false;
 	}
